@@ -54,12 +54,6 @@ const Sidebar = ({ admin, onLogout }) => {
               Properties
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/admin/manage-admins">
-              <RiAdminLine />
-              Manage Admins
-            </NavLink>
-          </li>
         </ul>
       </nav>
 
