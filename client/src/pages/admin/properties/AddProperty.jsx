@@ -36,7 +36,6 @@ const AddProperty = () => {
     }
   };
 
-  // submit property
   const handleSubmit = async () => {
     try {
       const fd = new FormData();
