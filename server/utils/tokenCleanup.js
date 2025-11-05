@@ -1,10 +1,24 @@
 // utils/tokenCleanup.js
 const connection = require('../connection/connection');
 
-const cleanupExpiredTokens = () => {
+const blacklistExpiredToken = () => {
   const now = new Date();
   connection.query(
     "UPDATE active_tokens SET is_blacklisted = 1 WHERE expires_at < ? AND is_blacklisted = 0",
+    [now],
+    (err, result) => {
+      if (err) {
+        console.error('Error blacklist Expired Token:', err);
+      } else {
+        console.log(`Black list ${result.affectedRows} expired tokens`);
+      }
+    }
+  );
+};
+const cleanUpExpiredToken = () => {
+  const now = new Date();
+  connection.query(
+    "DELETE FROM active_tokens WHERE is_blacklisted=1",
     [now],
     (err, result) => {
       if (err) {
@@ -17,6 +31,6 @@ const cleanupExpiredTokens = () => {
 };
 
 // Run cleanup every 5 minutes
-setInterval(cleanupExpiredTokens, 5 * 60 * 1000);
+setInterval(blacklistExpiredToken, 5 * 60 * 1000);
 
-module.exports = { cleanupExpiredTokens };
+module.exports = { cleanUpExpiredToken, blacklistExpiredToken };
