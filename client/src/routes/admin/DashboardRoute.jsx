@@ -13,7 +13,6 @@ import EditAdmin from "../../pages/admin/manage_admin/EditAdmin";
 import "../../assets/css/admin/product.css"
 import UpdateProperty from "../../pages/admin/properties/UpdateProperty";
 import AddProperty from "../../pages/admin/properties/AddProperty";
-import Properties from "../../pages/admin/properties/Property";
 import ViewAdmin from "../../pages/admin/manage_admin/ViewAdmin";
 import AssignedProperty from "../../pages/admin/properties/AssignProperties";
 import AddAssignment from "../../pages/admin/properties/AddAssignedProperties";
@@ -42,7 +41,6 @@ const AppRoutes = () => {
         <Route path="add-new_admin" element={<AddNewAdmin />} />
         <Route path="edit-admin/:id" element={<EditAdmin />} />
         <Route path="view-admin/:id" element={<ViewAdmin />} />
-        <Route path='property' element={<Properties />} />
         <Route path='property' element={<GetProperties />} />
         <Route path='addproperty' element={<AddProperty />} />
         <Route path='updateproperty' element={<UpdateProperty />} />
