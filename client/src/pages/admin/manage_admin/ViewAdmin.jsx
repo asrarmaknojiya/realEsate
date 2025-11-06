@@ -60,7 +60,7 @@ function ViewAdmin() {
 
                 const responses = await Promise.all(requests);
 
-                const formatted = responses.map(r => r.data); 
+                const formatted = responses.map(r => r.data);
                 setPropertiesDetail(formatted);
             } catch (error) {
                 console.error(error);
@@ -68,7 +68,7 @@ function ViewAdmin() {
         };
 
         fetchPropertiesById();
-    }, [propertId]); 
+    }, [propertId]);
 
 
 
@@ -107,11 +107,15 @@ function ViewAdmin() {
                         <div className="client-card">
                             <h4 className="client-subtext">Associated Properties</h4>
                             <ul className="client-property-list">
-                                {propertiesDetail.map((p, i) => (
-                                    <li key={i}>{p.title}  {p.address}</li>
-                                ))}
-                                {/* <li>456 Oakwood Lane (Greenwood)</li>
-                                <li>101 Forest Path (Pine Ridge)</li> */}
+
+                                {propertiesDetail.length > 0 ? (
+                                    propertiesDetail.map((p, i) => (
+                                        <li key={i}>{p.title}  {p.address} </li>
+                                    ))
+                                ) : (
+                                    <li>No Properties Assigned</li>
+                                )}
+
                             </ul>
                         </div>
                     </div>
