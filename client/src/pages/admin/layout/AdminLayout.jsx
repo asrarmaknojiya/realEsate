@@ -66,6 +66,7 @@ const AdminLayout = () => {
         const storedUser = JSON.parse(localStorage.getItem('user')) || {};
         const adminId = storedUser?.id;
         if (adminId) {
+          localStorage.removeItem('admin_id')
           localStorage.removeItem(`accessToken_${adminId}`);
           localStorage.removeItem(`user_${adminId}`);
           localStorage.removeItem(`isLoggedIn_${adminId}`);
@@ -75,7 +76,7 @@ const AdminLayout = () => {
         localStorage.removeItem('user');
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('lastActivityUpdate');
-
+        localStorage.clear()
         navigate('/admin/login', { replace: true });
       }
     }

@@ -33,6 +33,8 @@ api.interceptors.response.use(
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('admin_id');
+      localStorage.clear()
       window.location.href = '/admin/login';
     }
     return Promise.reject(error);

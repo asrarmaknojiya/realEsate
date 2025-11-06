@@ -11,6 +11,7 @@ const Sidebar = ({ admin, onLogout }) => {
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       onLogout();
+      localStorage.clear()
     }
   };
 
@@ -52,6 +53,12 @@ const Sidebar = ({ admin, onLogout }) => {
             <NavLink to="/admin/property">
               <RiAdminLine />
               Properties
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/admin/propertyassigned">
+              <RiAdminLine />
+              Propertyasigned
             </NavLink>
           </li>
         </ul>

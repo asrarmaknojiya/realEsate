@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 const GetProperties = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [properties, setProperties] = useState([]);
+  const [assignments, setAssignments] = useState([]); // <-- new
   const navigate = useNavigate();
 
   const fetchProperties = async () => {
@@ -22,15 +23,31 @@ const GetProperties = () => {
     }
   };
 
+  const fetchAssignments = async () => {
+    try {
+      const res = await axios.get("http://localhost:4500/getassignedproperties");
+      setAssignments(res.data || []);
+    } catch (err) {
+      console.error("fetchAssignments error", err);
+      // do not alert here, assignments are optional for UI overlay
+    }
+  };
+
+  // unified refresh that fetches both lists
+  const refreshAll = async () => {
+    await Promise.all([fetchProperties(), fetchAssignments()]);
+  };
+
   useEffect(() => {
-    fetchProperties();
+    refreshAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this property?")) return;
     try {
       await axios.delete(`http://localhost:4500/deleteproperty/${id}`);
-      await fetchProperties();
+      await refreshAll();
       alert("Property deleted successfully ");
     } catch (err) {
       console.error("Delete error:", err);
@@ -38,15 +55,26 @@ const GetProperties = () => {
     }
   };
 
-  // filter by status
-  const filtered = properties.filter((p) =>
+  // compute assigned ids set for quick lookup
+  const assignedPropertyIds = new Set((assignments || []).map((a) => String(a.property_id)));
+
+  // derive "effective" status: if property is in assignments => treat as 'reserved'
+  const propertiesWithEffectiveStatus = (properties || []).map((p) => {
+    const originalStatus = String(p.status || "").toLowerCase();
+    const isAssigned = assignedPropertyIds.has(String(p.id));
+    const effectiveStatus = isAssigned ? "reserved" : originalStatus || "available";
+    return { ...p, effectiveStatus };
+  });
+
+  // filter by effective status
+  const filtered = propertiesWithEffectiveStatus.filter((p) =>
     activeTab === "All"
       ? true
       : activeTab === "Available"
-      ? p.status === "available"
+      ? p.effectiveStatus === "available"
       : activeTab === "Reserved"
-      ? p.status === "reserved"
-      : p.status === "sold"
+      ? p.effectiveStatus === "reserved"
+      : p.effectiveStatus === "sold"
   );
 
   return (
@@ -87,6 +115,7 @@ const GetProperties = () => {
           >
             Sold
           </button>
+          <button onClick={refreshAll} style={{ marginLeft: 12 }}>Refresh</button>
         </div>
 
         {/* Table Section */}
@@ -128,14 +157,14 @@ const GetProperties = () => {
                     <td>
                       <span
                         className={`status ${
-                          p.status === "available"
+                          p.effectiveStatus === "available"
                             ? "published"
-                            : p.status === "reserved"
+                            : p.effectiveStatus === "reserved"
                             ? "pending"
                             : "out-of-stock"
                         }`}
                       >
-                        {p.status}
+                        {p.effectiveStatus}
                       </span>
                     </td>
                     <td>{p.createdat?.slice(0, 10) || "—"}</td>

@@ -52,6 +52,7 @@ const Login = () => {
       const adminId = admin.id;
 
       // per-admin keys
+      localStorage.setItem('admin_id',adminId)
       localStorage.setItem(`accessToken_${adminId}`, accessToken);
       localStorage.setItem(`user_${adminId}`, JSON.stringify(admin));
       localStorage.setItem(`isLoggedIn_${adminId}`, 'true');

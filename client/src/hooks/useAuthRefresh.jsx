@@ -39,11 +39,13 @@ export default function useAuthRefresh(adminId) {
 
   const handleLogout = () => {
     api.post('/logout').catch(() => {}).finally(() => {
+      localStorage.removeItem('admin_id');
       localStorage.removeItem(`accessToken_${adminId}`);
       localStorage.removeItem(`user_${adminId}`);
       localStorage.removeItem(`isLoggedIn_${adminId}`);
       localStorage.removeItem(`lastActivityUpdate_${adminId}`);
       localStorage.removeItem('user');
+      localStorage.clear()
       window.location.href = '/admin/login';
     });
   };
