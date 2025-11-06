@@ -6,7 +6,7 @@ import { IoPencil } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
 
 import api from "../../../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const ManageAdmin = () => {
   const [activeTab, setActiveTab] = useState("All");
@@ -30,7 +30,7 @@ const ManageAdmin = () => {
     activeTab === "All" ? true : activeTab === "Active" ? a.status === "active" : a.status === "block"
   );
 
-  const navigate=useNavigate()
+  const navigate = useNavigate()
 
   return (
     <>
@@ -65,9 +65,10 @@ const ManageAdmin = () => {
 
             <tbody>
               {filtered.map((a) => (
-                <tr key={a.id}>
+
+                <tr key={a.id} onClick={() => navigate(`/admin/view-admin/${a.id}`)}>
                   <td className="product-info admin-profile">
-                    <img src={ `/uploads/${a.img}` } alt="profile_image" />
+                    <img src={`/uploads/${a.img}`} alt="profile_image" />
                     <span>{a.name}</span>
                   </td>
                   <td>{a.email}</td>
