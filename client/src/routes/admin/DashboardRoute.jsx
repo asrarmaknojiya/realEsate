@@ -50,6 +50,7 @@ const AppRoutes = () => {
         <Route path='propertyassigned' element={<AssignedProperty />} />
         <Route path='addpropertyassigned' element={<AddAssignment />} />
         <Route path='updatepropertyassigned' element={<UpdateAssignment />} />
+        <Route path='property/:id' element={<PropertyDetails />} />
         <Route path='payments' element={<PaymentsHistory />} />
         <Route path='addpayment' element={<AddPayment />} />
         <Route path='updatepayment' element={<UpdatePayment />} />

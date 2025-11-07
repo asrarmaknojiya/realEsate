@@ -86,8 +86,9 @@ export default function AddAssignment() {
 
   return (
     <>
-      <Sidebar />
-      <Navbar />
+      {/* show sidebar only on desktop */}
+      {!isMobile && !isTablet && <Sidebar isMobile={isMobile} isTablet={isTablet} isSidebarOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(v=>!v)} />}
+      <Navbar isMobile={isMobile} isTablet={isTablet} toggleSidebar={() => setIsSidebarOpen(v=>!v)} />
 
       <main className="admin-panel-header-div">
         <Breadcrumb
