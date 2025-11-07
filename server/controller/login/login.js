@@ -3,7 +3,9 @@ const connection = require('../../connection/connection');
 const { generateAccessToken } = require('../../utils/jwtUtils');
 
 const login = (req, res) => {
+
   const { identifier, password } = req.body;
+  
   const ip = req.ip || '127.0.0.1';
   const userAgent = req.headers['user-agent'] || '';
 
