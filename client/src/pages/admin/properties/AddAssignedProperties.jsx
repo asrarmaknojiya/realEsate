@@ -26,6 +26,21 @@ export default function AddAssignment() {
   });
   const [error, setError] = useState("");
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [isTablet, setIsTablet] = useState(window.innerWidth > 768 && window.innerWidth <= 1024);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+      setIsTablet(window.innerWidth > 768 && window.innerWidth <= 1024);
+      if (window.innerWidth >= 1024) setIsSidebarOpen(false);
+    };
+    window.addEventListener("resize", onResize);
+    onResize();
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -87,10 +102,11 @@ export default function AddAssignment() {
 
   return (
     <>
-      <Sidebar />
-      <Navbar />
+      {/* show sidebar only on desktop */}
+      {!isMobile && !isTablet && <Sidebar isMobile={isMobile} isTablet={isTablet} isSidebarOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(v=>!v)} />}
+      <Navbar isMobile={isMobile} isTablet={isTablet} toggleSidebar={() => setIsSidebarOpen(v=>!v)} />
 
-      <main className="admin-panel-header-div">
+      <main className={`admin-panel-header-div ${isMobile ? "mobile-view" : ""} ${isTablet ? "tablet-view" : ""}`}>
         <div className="admin-dashboard-main-header" style={{ marginBottom: 24 }}>
           <div>
             <h5>Create Assignment</h5>
@@ -115,13 +131,13 @@ export default function AddAssignment() {
         </div>
 
         <div className="dashboard-add-content-card-div" style={{ paddingBottom: 40 }}>
-          <div className="dashboard-add-content-left-side" style={{ maxWidth: 720 }}>
+          <div className="dashboard-add-content-left-side" style={{ maxWidth: 900 }}>
             <div className="dashboard-add-content-card">
               <h6>Assignment Details</h6>
 
               {error && <div style={{ color: "crimson", marginBottom: 8 }}>{error}</div>}
 
-              <div className="add-product-form-container">
+              <form className="add-product-form-container" onSubmit={handleSubmit}>
                 <label>Client</label>
                 <select name="client_id" value={form.client_id} onChange={handleChange}>
                   <option value="">-- select client --</option>
@@ -142,7 +158,10 @@ export default function AddAssignment() {
 
                 <label style={{ marginTop: 8 }}>Assigned at (manual)</label>
                 <input type="datetime-local" name="assigned_at" value={form.assigned_at} onChange={handleChange} />
-              </div>
+
+                {/* mobile/desktop save sits in header; keep form submit as fallback */}
+                <div style={{ height: 8 }} />
+              </form>
             </div>
           </div>
         </div>

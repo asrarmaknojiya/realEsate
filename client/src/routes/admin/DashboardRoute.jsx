@@ -18,6 +18,7 @@ import AssignedProperty from "../../pages/admin/properties/AssignProperties";
 import AddAssignment from "../../pages/admin/properties/AddAssignedProperties";
 import UpdateAssignment from "../../pages/admin/properties/UpdateAssignedProperties";
 import GetProperties from "../../pages/admin/properties/Property";
+import PropertyDetails from "../../pages/admin/properties/propertyDetails";
 
 const AppRoutes = () => {
 
@@ -47,6 +48,7 @@ const AppRoutes = () => {
         <Route path='propertyassigned' element={<AssignedProperty />} />
         <Route path='addpropertyassigned' element={<AddAssignment />} />
         <Route path='updatepropertyassigned' element={<UpdateAssignment />} />
+        <Route path='property/:id' element={<PropertyDetails />} />
       </Route>
       <Route path="*" element={<Navigate to="/admin/login" replace />} />
     </Routes>

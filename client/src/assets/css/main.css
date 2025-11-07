@@ -1089,3 +1089,178 @@ button {
     padding: 9px;
   }
 }
+
+
+
+
+
+
+
+
+/* ===== Header tweaks for Add / Update pages (Back + Title, no breadcrumb links) ===== */
+
+/* left header (back + title) */
+.left-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* small visual style for the header back button */
+.header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ee;
+  background: transparent;
+  color: #111827;
+  cursor: pointer;
+}
+
+/* ensure header keeps one row and doesn't stack on mobile for add/update pages */
+.admin-panel-header-div.mobile-view .admin-dashboard-main-header,
+.admin-panel-header-div.tablet-view .admin-dashboard-main-header {
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap; /* allow wrapping if needed but primary layout is row */
+}
+
+/* hide the breadcrumb links for add/update pages if present */
+.admin-panel-header-div .admin-panel-breadcrumb {
+  display: none !important;
+}
+
+/* ensure Add/Cancel buttons are inline and don't stack */
+.admin-panel-header-add-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* make buttons flexible but keep them on same row on tiny screens */
+.admin-panel-header-add-buttons .dashboard-add-product-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* small screens: allow buttons to shrink but still remain inline */
+@media (max-width: 420px) {
+  .admin-panel-header-add-buttons {
+    gap: 8px;
+  }
+  .admin-panel-header-add-buttons .dashboard-add-product-btn {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* keep header-left gap reasonable on very small screens */
+@media (max-width: 360px) {
+  .left-header { gap: 8px; }
+  .header-back { padding: 6px 8px; }
+}
+
+
+
+/* ===== Header grid for Add / Update pages ===== */
+/* Use grid to guarantee center title and left/right alignment */
+.header-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* left / center / right */
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 18px;
+  /* ensure header sits visually separated */
+  padding: 6px 0;
+}
+
+/* left / center / right cells */
+.header-left { display:flex; align-items:center; justify-content:flex-start; gap:12px; }
+.header-center { display:flex; align-items:center; justify-content:center; }
+.header-right { display:flex; align-items:center; justify-content:flex-end; gap:10px; }
+
+/* back button style */
+.header-back {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #e6e9ee;
+  background:transparent;
+  color:#111827;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* make sure h5 has consistent size and doesn't shift */
+.header-center h5 {
+  margin:0;
+  font-size:20px;
+  font-weight:700;
+  text-align:center;
+}
+
+/* keep cancel/save inline */
+.admin-panel-header-add-buttons,
+.header-right {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:nowrap;
+}
+
+/* prevent the right area from pushing center off-screen on tiny devices */
+.header-right .dashboard-add-product-btn,
+.admin-panel-header-add-buttons .dashboard-add-product-btn {
+  flex: 0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* ensure admin-panel-header-div mobile/tablet variants keep header-row single line
+   but allow wrapping only if absolutely needed */
+.admin-panel-header-div.mobile-view .header-grid,
+.admin-panel-header-div.tablet-view .header-grid {
+  grid-template-columns: 1fr auto 1fr;
+  align-items:center;
+}
+
+/* on very small screens allow subtle wrap but keep title visually centered */
+@media (max-width: 520px) {
+  .header-grid {
+    grid-template-columns: auto 1fr auto;
+  }
+  .header-center { justify-content:center; }
+  .header-left { justify-content:flex-start; }
+  .header-right { justify-content:flex-end; }
+  .header-back { padding:6px 10px; }
+  .header-center h5 { font-size:18px; }
+}
+
+/* Desktop spacing improvements */
+@media (min-width: 1025px) {
+  .header-grid { margin-bottom: 22px; }
+  .header-center h5 { font-size:22px; }
+  .admin-dashboard-main-header .dashboard-add-product-btn { padding: 10px 16px; }
+}
+
+/* keep breadcrumbs hidden on these pages (we handle title only) */
+.admin-panel-header-div .admin-panel-breadcrumb {
+  display:none !important;
+}
+
+/* ensure admin-panel-header-div keeps its existing desktop offset behavior
+   (don't change sidebar/layout rules) */
+.admin-panel-header-div {
+  transition: all 0.15s ease;
+}
