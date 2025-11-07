@@ -6,7 +6,7 @@ import api from '../../../api/axiosInstance';
 import useAuthRefresh from '../../../hooks/useAuthRefresh';
 
 const AdminLayout = () => {
-  const [admin, setAdmin] = useState({});
+  const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
