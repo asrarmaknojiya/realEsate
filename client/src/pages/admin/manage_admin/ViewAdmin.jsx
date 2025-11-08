@@ -14,13 +14,13 @@ function ViewAdmin() {
   const [openProperty, setOpenProperty] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showSaleModal, setShowSaleModal] = useState(false);
-  const [showMarkPaidModal, setShowMarkPaidModal] = useState(false);
-  const [showRejectComment, setShowRejectComment] = useState(false);
-
   const [clientInfo, setClientInfo] = useState({});
   const [propertId, setPropertId] = useState([]);
   const [propertiesDetail, setPropertiesDetail] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [clientPayments, setClientPayments] = useState([]);
+  const [paymenterror, setPaymentError] = useState("");
+  const [selectedProperty, setSelectedProperty] = useState(null);
 
   const [assignedForm, setAssignedForm] = useState({
     property_id: "",
@@ -32,8 +32,6 @@ function ViewAdmin() {
   });
   const [assignedError, setAssignedError] = useState("");
 
-  const [clientPayments, setClientPayments] = useState([]);
-
   const [paymentForm, setPaymentForm] = useState({
     property_id: "",
     client_id: "",
@@ -43,16 +41,13 @@ function ViewAdmin() {
     paid_at: "",
   });
 
-  const [paymenterror, setPaymentError] = useState("");
-  const [selectedProperty, setSelectedProperty] = useState(null);
-
   const [isEditing, setIsEditing] = useState(false);
   const [editingPayment, setEditingPayment] = useState(null);
 
   const sigCanvas = useRef(null);
 
   // ===========================================================
-  // 🔹 FETCH CLIENT DATA + PROPERTIES + PAYMENTS
+  // 🔹 FETCH CLIENT INFO, PROPERTIES, AND PAYMENTS
   // ===========================================================
   const fetchClientInfo = async () => {
     try {
@@ -74,29 +69,6 @@ function ViewAdmin() {
     }
   };
 
-  useEffect(() => {
-    fetchClientInfo();
-    fetchClientAssignProperties();
-  }, []);
-
-  useEffect(() => {
-    const fetchPropertiesById = async () => {
-      try {
-        const requests = propertId.map((p) =>
-          axios.get(`http://localhost:4500/getproperties/${p.property_id}`)
-        );
-
-        const responses = await Promise.all(requests);
-        const formatted = responses.map((r) => r.data);
-        setPropertiesDetail(formatted);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    if (propertId.length) fetchPropertiesById();
-  }, [propertId]);
-
   const assignProperties = async () => {
     try {
       const res = await axios.get(`http://localhost:4500/getproperties`);
@@ -108,10 +80,6 @@ function ViewAdmin() {
       console.error(error);
     }
   };
-
-  useEffect(() => {
-    assignProperties();
-  }, []);
 
   const getClientPayments = async () => {
     try {
@@ -125,11 +93,30 @@ function ViewAdmin() {
   };
 
   useEffect(() => {
+    fetchClientInfo();
+    fetchClientAssignProperties();
+    assignProperties();
     getClientPayments();
   }, []);
 
+  useEffect(() => {
+    const fetchPropertiesById = async () => {
+      try {
+        const requests = propertId.map((p) =>
+          axios.get(`http://localhost:4500/getproperties/${p.property_id}`)
+        );
+        const responses = await Promise.all(requests);
+        const formatted = responses.map((r) => r.data);
+        setPropertiesDetail(formatted);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    if (propertId.length) fetchPropertiesById();
+  }, [propertId]);
+
   // ===========================================================
-  // 🔹 ASSIGN PROPERTY (SALE)
+  // 🔹 ASSIGN SALE HANDLERS
   // ===========================================================
   const handleAssignProperty = (e) =>
     setAssignedForm({ ...assignedForm, [e.target.name]: e.target.value });
@@ -154,6 +141,7 @@ function ViewAdmin() {
 
       alert("Property assigned successfully ✅");
       await fetchClientAssignProperties();
+      await assignProperties();
       setShowSaleModal(false);
       setAssignedForm({
         property_id: "",
@@ -164,7 +152,7 @@ function ViewAdmin() {
         assigned_at: "",
       });
     } catch (err) {
-      console.error("Submit error:", err);
+      console.error(err);
       setAssignedError("Failed to assign property");
     }
   };
@@ -247,7 +235,7 @@ function ViewAdmin() {
           client_id: paymentForm.client_id,
           amount: Number(paymentForm.amount) || null,
           payment_method: paymentForm.payment_method || null,
-          status: "pending",
+          status: "completed",
           notes: paymentForm.details || null,
           paid_at: paymentForm.paid_at
             ? paymentForm.paid_at.replace("T", " ")
@@ -279,12 +267,12 @@ function ViewAdmin() {
     });
   };
 
-  const handleClearSignature = () => sigCanvas.current.clear();
-
-  const toggleProperty = (id) => {
+  const toggleProperty = (id) =>
     setOpenProperty(openProperty === id ? null : id);
-  };
 
+  // ===========================================================
+  // 🔹 UI SECTION
+  // ===========================================================
   return (
     <>
       <div className="client-section">
@@ -299,7 +287,7 @@ function ViewAdmin() {
         </div>
 
         <div className="client-layout">
-          {/* CLIENT INFO */}
+          {/* Sidebar */}
           <div className="client-sidebar">
             <div className="client-card">
               <h3 className="client-name">{clientInfo.name}</h3>
@@ -328,11 +316,10 @@ function ViewAdmin() {
             </div>
           </div>
 
-          {/* MAIN SECTION */}
+          {/* Main Section */}
           <div className="client-main">
             <div className="client-sale-box">
               <h4 className="client-box-title">Sales & Payments</h4>
-
               {propertiesDetail.length > 0 ? (
                 propertiesDetail.map((p, i) => (
                   <div
@@ -346,7 +333,6 @@ function ViewAdmin() {
                     </div>
 
                     <p className="client-sale-price">₹{p.price}</p>
-
                     <div className="client-sale-plan">
                       <p className="client-sale-note">{p.description}</p>
                       {openProperty === p.id ? (
@@ -443,7 +429,82 @@ function ViewAdmin() {
         </div>
       </div>
 
-      {/* PAYMENT MODAL (ADD + EDIT) */}
+      {/* ===================== SALE MODAL ===================== */}
+      {showSaleModal && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal better-modal mark-paid-modal">
+            <div className="payment-modal-header">
+              <h3>Record a New Sale</h3>
+              <button
+                className="payment-close-btn"
+                onClick={() => setShowSaleModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {assignedError && (
+              <div style={{ color: "crimson", marginBottom: 10 }}>
+                {assignedError}
+              </div>
+            )}
+
+            <select
+              name="property_id"
+              value={assignedForm.property_id}
+              onChange={handleAssignProperty}
+            >
+              <option value="">-- select property --</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title} — ₹{p.price}
+                </option>
+              ))}
+            </select>
+
+            <input
+              className="payment-input"
+              name="amount"
+              value={assignedForm.amount}
+              onChange={handleAssignProperty}
+              placeholder="Amount"
+            />
+
+            <input
+              className="payment-input"
+              type="datetime-local"
+              name="assigned_at"
+              value={assignedForm.assigned_at}
+              onChange={handleAssignProperty}
+            />
+
+            <textarea
+              className="payment-textarea"
+              name="details"
+              value={assignedForm.details}
+              onChange={handleAssignProperty}
+              placeholder="Details"
+            />
+
+            <div className="payment-modal-actions">
+              <button
+                className="payment-cancel"
+                onClick={() => setShowSaleModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="payment-save"
+                onClick={handleAssignPropertySubmit}
+              >
+                Save Sale
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ===================== PAYMENT MODAL ===================== */}
       {showPaymentModal && (
         <div className="payment-modal-overlay">
           <div className="payment-modal better-modal mark-paid-modal">
