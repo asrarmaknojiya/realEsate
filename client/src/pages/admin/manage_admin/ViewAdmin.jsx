@@ -4,7 +4,6 @@ import "../../../assets/css/admin/viewAdmin.css";
 import SignaturePad from "react-signature-canvas";
 import { FaEnvelope, FaPhone } from "react-icons/fa";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
-import axios from "axios";
 import api from "../../../api/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -77,7 +76,7 @@ function ViewAdmin() {
 
     const fetchClientAssignProperties = async () => {
         try {
-            const res = await axios.get(
+            const res = await api.get(
                 `${API_ROOT}/getAssignedPropertyByClientId/${id}`
             );
             setPropertId(res.data || []);
@@ -88,7 +87,7 @@ function ViewAdmin() {
 
     const assignProperties = async () => {
         try {
-            const res = await axios.get(`${API_ROOT}/getproperties`);
+            const res = await api.get(`${API_ROOT}/getproperties`);
             const available = (res.data || []).filter(
                 (p) => (p.status || "").toLowerCase() === "available"
             );
@@ -100,7 +99,7 @@ function ViewAdmin() {
 
     const getClientPayments = async () => {
         try {
-            const res = await axios.get(`${API_ROOT}/getPaymentsByClientId/${id}`);
+            const res = await api.get(`${API_ROOT}/getPaymentsByClientId/${id}`);
             setClientPayments(res.data || []);
         } catch (error) {
             console.error("getClientPayments", error);
@@ -123,7 +122,7 @@ function ViewAdmin() {
                     return;
                 }
                 const requests = propertId.map((p) =>
-                    axios.get(`${API_ROOT}/getproperties/${p.property_id}`)
+                    api.get(`${API_ROOT}/getproperties/${p.property_id}`)
                 );
                 const responses = await Promise.all(requests);
                 const formatted = responses.map((r) => r.data);
@@ -149,7 +148,7 @@ function ViewAdmin() {
             return;
         }
         try {
-            await axios.post(`${API_ROOT}/addassignedproperty`, {
+            await api.post(`${API_ROOT}/addassignedproperty`, {
                 property_id: assignedForm.property_id,
                 client_id: Number(assignedForm.client_id),
                 assigned_by: Number(assignedForm.assigned_by),
@@ -221,7 +220,7 @@ function ViewAdmin() {
             return setPaymentError("Property and Client are required");
 
         try {
-            await axios.post(`${API_ROOT}/addpayment`, {
+            await api.post(`${API_ROOT}/addpayment`, {
                 property_id: paymentForm.property_id,
                 client_id: Number(paymentForm.client_id),
                 amount: paymentForm.amount || null,
@@ -246,7 +245,7 @@ function ViewAdmin() {
         if (!editingPayment) return alert("No payment selected");
 
         try {
-            await axios.put(`${API_ROOT}/updatepayment/${editingPayment.id}`, {
+            await api.put(`${API_ROOT}/updatepayment/${editingPayment.id}`, {
                 property_id: paymentForm.property_id,
                 client_id: paymentForm.client_id,
                 amount: Number(paymentForm.amount) || null,
@@ -360,12 +359,12 @@ function ViewAdmin() {
             fd.append("signature", blob, `signature_${Date.now()}.png`);
 
             // call addpaymentconfirmation (multer expects 'signature' file)
-            await axios.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
+            await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
             // update the payment row as paid
-            await axios.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, {
+            await api.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, {
                 status: "completed",
                 paid_at: markConfirmedAt ? markConfirmedAt.replace("T", " ") : new Date().toISOString().replace("T", " "),
             });
@@ -418,7 +417,7 @@ function ViewAdmin() {
             });
 
             // update payment status to rejected if desired
-            await axios.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, {
+            await api.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, {
                 status: "rejected",
                 color: "red"
             });
