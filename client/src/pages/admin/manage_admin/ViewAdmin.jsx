@@ -414,7 +414,7 @@ function ViewAdmin() {
                 }
             }
 
-            await axios.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
+            await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
