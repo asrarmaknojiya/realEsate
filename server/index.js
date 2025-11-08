@@ -6,6 +6,7 @@ const authRoutes = require('./routes/login/login');
 const property = require("./routes/properties/property");
 const assignedproperties = require("./routes/properties/assignproperty");
 const payments = require("./routes/payment/payments");
+const paymentsconfirmation = require("./routes/payment/paymentconfirmation");
 
 
 const { cleanUpExpiredToken, blacklistExpiredToken } = require("./utils/tokenCleanup")
@@ -19,6 +20,7 @@ app.use('/admin', authRoutes);
 app.use('', property);
 app.use('', assignedproperties);
 app.use('', payments);
+app.use('', paymentsconfirmation);
 
 blacklistExpiredToken()
 cleanUpExpiredToken()
