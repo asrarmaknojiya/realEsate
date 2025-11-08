@@ -7,7 +7,6 @@ import Navbar from "../layout/Navbar";
 import Breadcrumb from "../layout/Breadcrumb";
 import { IoPencil } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
 
 import "../../../assets/css/admin-card.css"; // keep your styles
 import api from "../../../api/axiosInstance";
