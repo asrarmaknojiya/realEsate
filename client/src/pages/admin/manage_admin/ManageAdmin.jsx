@@ -1,3 +1,4 @@
+// client/src/pages/admin/ManageAdmin.jsx
 import React, { useEffect, useState } from "react";
 import Sidebar from "../layout/Sidebar";
 import Navbar from "../layout/Navbar";
@@ -5,7 +6,7 @@ import Breadcrumb from "../layout/Breadcrumb";
 import { IoPencil } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
 import api from "../../../api/axiosInstance";
-import { NavLink, useNavigate, useNavigationType } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import "../../../assets/css/admin-card.css"
 import { FaRegEye } from "react-icons/fa";
@@ -37,12 +38,16 @@ const ManageAdmin = () => {
       const width = window.innerWidth;
       setIsMobile(width < 768);
       setIsTablet(width >= 768 && width < 1024);
-      if (!(width < 768) && !(width >= 768 && width < 1024)) {
+
+      // keep sidebar state consistent: only allow sidebar-open on desktop
+      if (width >= 1024) {
+        // keep as is (desktop supports sidebar open)
+      } else {
         setIsSidebarOpen(false);
       }
     };
     window.addEventListener("resize", handleResize);
-    handleResize();
+    handleResize(); // run once to initialize properly
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -57,7 +62,6 @@ const ManageAdmin = () => {
     try {
       await api.delete(`/admin/clients/${id}`);
       setAdmins(prev => prev.filter(a => a.id !== id));
-      // if modal open for same admin, close it
       if (selectedAdmin?.id === id) setSelectedAdmin(null);
     } catch (error) {
       console.error("Delete error:", error);
@@ -85,8 +89,8 @@ const ManageAdmin = () => {
 
       <main className={`admin-panel-header-div ${isMobile ? "mobile-view" : ""} ${isTablet ? "tablet-view" : ""} ${isSidebarOpen ? "sidebar-open" : ""}`}>
         <Breadcrumb
-          title="Admin"
-          breadcrumbText="Admin List"
+          title="Clients"
+          breadcrumbText="Clients List"
           button={{ link: "/admin/add-new_admin", text: "Add New Admin" }}
           isMobile={isMobile}
           isTablet={isTablet}
@@ -98,17 +102,17 @@ const ManageAdmin = () => {
           <button className={`admin-panel-header-tab ${activeTab === "Blocked" ? "active" : ""}`} onClick={() => setActiveTab("Blocked")}>Blocked</button>
         </div>
 
-        {/* === Desktop / wide screens: keep your table === */}
-        {!isMobile && (
-          <div className={`dashboard-table-container ${isTablet ? "tablet-table" : ""}`}>
+        {/* === Desktop / wide screens: show table ONLY on desktop (NOT tablet) === */}
+        {(!isMobile && !isTablet) && (
+          <div className={`dashboard-table-container`}>
             <table>
               <thead>
                 <tr>
                   <th className="admin-name">Name</th>
-                  {!isMobile && <th className="admin-email">Email</th>}
-                  {!isMobile && <th className="admin-phone">Phone No</th>}
+                  <th className="admin-email">Email</th>
+                  <th className="admin-phone">Phone No</th>
                   <th className="admin-status">Status</th>
-                  {!isMobile && <th className="admin-added">Added</th>}
+                  <th className="admin-added">Added</th>
                   <th className="admin-actions">Action</th>
                 </tr>
               </thead>
@@ -121,15 +125,14 @@ const ManageAdmin = () => {
                         <img src={`/uploads/${a.img}`} alt={`${a.name} profile`} />
                         <div className="admin-info-mobile">
                           <span>{a.name}</span>
-                          {isMobile && <p>{a.email}</p>}
                         </div>
                       </td>
-                      {!isMobile && <td className="admin-email">{a.email}</td>}
-                      {!isMobile && <td className="admin-phone">{a.number}</td>}
+                      <td className="admin-email">{a.email}</td>
+                      <td className="admin-phone">{a.number}</td>
                       <td className="admin-status">
                         <span className={`status ${a.status === "active" ? "published" : "out-of-stock"}`}>{a.status}</span>
                       </td>
-                      {!isMobile && <td className="admin-added">{a.createdat?.slice(0, 10)}</td>}
+                      <td className="admin-added">{a.createdat?.slice(0, 10)}</td>
                       <td className="actions admin-actions">
                         <FaRegEye onClick={() => navigate(`/admin/view-admin/${a.id}`)} />
                         <IoPencil onClick={() => navigate(`/admin/edit-admin/${a.id}`)} className="edit-btn" title="Edit admin" />
@@ -149,7 +152,7 @@ const ManageAdmin = () => {
           </div>
         )}
 
-        
+        {/* === Tablet & Mobile: show stacked cards === */}
         {(isMobile || isTablet) && (
           <div className="cardlist" style={{ marginTop: 16 }}>
             {filtered.length > 0 ? filtered.map(a => (
@@ -158,7 +161,7 @@ const ManageAdmin = () => {
                 className="card-row"
                 role="button"
                 tabIndex={0}
-                onClick={() => navigate(`/admin/client/${a.id}`)} // <-- navigate to new client page for mobile & tablet
+                onClick={() => navigate(`/admin/client/${a.id}`)}
                 onKeyDown={(e) => { if (e.key === "Enter") navigate(`/admin/client/${a.id}`); }}
               >
                 <div className="card-left">
@@ -183,7 +186,7 @@ const ManageAdmin = () => {
         )}
 
 
-        {/* === Modal for selected admin === */}
+        {/* === Modal for selected admin (desktop only) === */}
         {selectedAdmin && (
           <div className="detail-modal-overlay" onClick={() => setSelectedAdmin(null)}>
             <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
