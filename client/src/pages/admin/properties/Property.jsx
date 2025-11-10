@@ -97,7 +97,6 @@ const GetProperties = () => {
                 <th>Address</th>
                 <th>Price</th>
                 <th>Status</th>
-                <th>Added</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -122,7 +121,6 @@ const GetProperties = () => {
                       {p.status}
                     </span>
                   </td>
-                  <td>{p.createdat?.slice(0, 10)}</td>
                   <td className="actions">
                     <IoPencil
                       onClick={(e) => { e.stopPropagation(); navigate("/admin/updateproperty", { state: { item: p } }); }}
