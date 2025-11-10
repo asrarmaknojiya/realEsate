@@ -13,6 +13,7 @@ function ViewAdmin() {
     const user = JSON.parse(localStorage.getItem("user"))
     const user_role = user.role
     const navigate = useNavigate();
+                                                
 
     const [openProperty, setOpenProperty] = useState(null);
 
