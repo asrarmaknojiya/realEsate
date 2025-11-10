@@ -142,6 +142,23 @@ const deletePayment = (req, res) => {
   });
 };
 
+const updatePaymentStatus = (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const query = "UPDATE payments SET status = ? WHERE id = ?";
+
+  connection.query(query, [status, id], (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ message: "DB error", error: err });
+    }
+
+    return res.json({ message: "Updated", result });
+  });
+};
+
+
 module.exports = {
   getPayments,
   getPaymentById,
@@ -150,4 +167,5 @@ module.exports = {
   addPayment,
   updatePayment,
   deletePayment,
+  updatePaymentStatus
 };

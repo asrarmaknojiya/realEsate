@@ -9,8 +9,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function ViewAdmin() {
     const { id } = useParams(); // client id
+    console.log(id)
     const admin_id = localStorage.getItem("admin_id")
-    console.log(admin_id)
     const navigate = useNavigate();
 
     const [openProperty, setOpenProperty] = useState(null);
@@ -59,6 +59,7 @@ function ViewAdmin() {
     const [markConfirmedAt, setMarkConfirmedAt] = useState(""); // datetime-local string
     const [rejectReason, setRejectReason] = useState("");
     const [markError, setMarkError] = useState("");
+
 
     const sigCanvas = useRef(null);
 
@@ -177,9 +178,6 @@ function ViewAdmin() {
         }
     };
 
-    // ===========================================================
-    // 🔹 PAYMENT HANDLERS (ADD + EDIT)
-    // ===========================================================
     const handlePayment = (e) => {
         const { name, value } = e.target;
         setPaymentForm((prev) => ({ ...prev, [name]: value }));
@@ -283,9 +281,6 @@ function ViewAdmin() {
 
     const toggleProperty = (id) => setOpenProperty(openProperty === id ? null : id);
 
-    // ===========================================================
-    // 🔹 MARK PAID / REJECT: Open modal (pass payment row)
-    // ===========================================================
     const openMarkPaidForPayment = (e, payment) => {
         e.stopPropagation();
         setSelectedPayment(payment);
@@ -421,7 +416,6 @@ function ViewAdmin() {
             // update payment status to rejected if desired
             await api.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, {
                 status: "rejected",
-                color: "red"
             });
 
             alert("Payment rejected and reason saved ❌");
@@ -436,10 +430,22 @@ function ViewAdmin() {
         }
     };
 
+    const handleUpdatePaymentStatus = async (paymentId) => {
+        try {
+            await api.put(`${API_ROOT}/updatePaymentStatus/${paymentId}`, {
+                status: "refunded",
+            })
+            alert("Payment refunded Successfull");
+            await getClientPayments();
+        } catch (error) {
+            console.error(error);
+            alert("Payment refunded Failed");
+        }
+    }
+
     return (
         <>
             <div className="client-section">
-                {/* ===================== NEW HEADER (Back + Add Sale + Title) ===================== */}
                 <div className="view-admin-header">
                     <div className="header-top">
                         <div className="header-top-left">
@@ -546,14 +552,39 @@ function ViewAdmin() {
                                                                 </td>
                                                                 <td>{pay.payment_date ? pay.payment_date.slice(0, 10) : "N/A"}</td>
                                                                 <td>
-                                                                    {id === admin_id ? (
-                                                                        <button className="client-mark-paid-btn" onClick={(e) => openMarkPaidForPayment(e, pay)}>
-                                                                            Mark Paid
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button className="client-add-payment-btn" onClick={(e) => handleEditPayment(e, pay)}>Edit</button>
+                                                                    {
+                                                                        pay.status === "refunded" ? (
+                                                                            <></>
+                                                                        ) : pay.status === "completed" || pay.status === "rejected" ? (
+                                                                            id === admin_id ? (
+                                                                                <></>
+                                                                            ) : (
+                                                                                <button
+                                                                                    className="client-add-payment-btn"
+                                                                                    onClick={() => handleUpdatePaymentStatus(pay.id)}
+                                                                                >
+                                                                                    Delete
+                                                                                </button>
+                                                                            )
+                                                                        ) : (
+                                                                            id === admin_id ? (
+                                                                                <button
+                                                                                    className="client-mark-paid-btn"
+                                                                                    onClick={(e) => openMarkPaidForPayment(e, pay)}
+                                                                                >
+                                                                                    Mark Paid
+                                                                                </button>
+                                                                            ) : (
+                                                                                <button
+                                                                                    className="client-add-payment-btn"
+                                                                                    onClick={(e) => handleEditPayment(e, pay)}
+                                                                                >
+                                                                                    Edit
+                                                                                </button>
+                                                                            )
+                                                                        )
+                                                                    }
 
-                                                                    )}
 
 
                                                                 </td>
