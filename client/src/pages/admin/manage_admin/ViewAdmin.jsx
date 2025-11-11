@@ -9,7 +9,9 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function ViewAdmin() {
     const { id } = useParams(); // client id
+
     const admin_id = localStorage.getItem("admin_id")
+  
     const user = JSON.parse(localStorage.getItem("user"))
     const user_role = user.role
     const navigate = useNavigate();
@@ -52,6 +54,7 @@ function ViewAdmin() {
         details: "",
         payment_method: "",
         paid_at: "",
+        created_by:""
     });
     const [paymenterror, setPaymentError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
@@ -198,6 +201,7 @@ function ViewAdmin() {
             details: "",
             payment_method: "",
             paid_at: "",
+            created_by:""
         });
         setShowPaymentModal(true);
     };
@@ -232,7 +236,8 @@ function ViewAdmin() {
                 paid_at: paymentForm.paid_at || new Date().toISOString(),
                 notes: paymentForm.details || null,
                 status: "pending",
-                backgroundColor: "yellow"
+                backgroundColor: "yellow",
+                created_by: localStorage.getItem("admin_id")
             });
 
             alert("Payment added successfully ✅");
@@ -486,7 +491,7 @@ function ViewAdmin() {
                     </div>
 
                     <div className="header-title">
-                        <h2 className="client-title">Client Details</h2>
+                        <h2 className="client-title">Payment Details</h2>
                     </div>
                 </div>
 
@@ -588,14 +593,17 @@ function ViewAdmin() {
                                                                 </td>
                                                                 <td>{pay.paid_at ? pay.paid_at.slice(0, 10) : "N/A"}</td>
                                                                 <td>
-                                                                    {/* existing button logic */}
                                                                     {
                                                                         pay.status === "refunded" ? (
                                                                             <></>
                                                                         ) : pay.status === "completed" || pay.status === "rejected" ? (
-                                                                            id === admin_id ? (
+
+                                                                            // COMPLETED or REJECTED
+                                                                            pay.created_by == admin_id ? (
+                                                                                // Creator = current user → no button
                                                                                 <></>
                                                                             ) : (
+                                                                                // Not creator → delete option
                                                                                 <button
                                                                                     className="client-add-payment-btn"
                                                                                     onClick={() => handleUpdatePaymentStatus(pay.id)}
@@ -603,20 +611,25 @@ function ViewAdmin() {
                                                                                     Delete
                                                                                 </button>
                                                                             )
+
                                                                         ) : (
-                                                                            id === admin_id ? (
-                                                                                <button
-                                                                                    className="client-mark-paid-btn"
-                                                                                    onClick={(e) => openMarkPaidForPayment(e, pay)}
-                                                                                >
-                                                                                    Mark Paid
-                                                                                </button>
-                                                                            ) : (
+
+                                                                            // PENDING PAYMENT
+                                                                            pay.created_by == admin_id ? (
+                                                                                // Logged-in user created → can edit
                                                                                 <button
                                                                                     className="client-add-payment-btn"
                                                                                     onClick={(e) => handleEditPayment(e, pay)}
                                                                                 >
                                                                                     Edit
+                                                                                </button>
+                                                                            ) : (
+                                                                                // Someone else created → mark as paid
+                                                                                <button
+                                                                                    className="client-mark-paid-btn"
+                                                                                    onClick={(e) => openMarkPaidForPayment(e, pay)}
+                                                                                >
+                                                                                    Mark Paid
                                                                                 </button>
                                                                             )
                                                                         )
@@ -659,6 +672,7 @@ function ViewAdmin() {
                                                                         );
                                                                     })()}
                                                                 </td>
+
 
 
                                                                 {/* <td>
