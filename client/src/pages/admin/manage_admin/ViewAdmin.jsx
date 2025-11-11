@@ -43,7 +43,7 @@ function ViewAdmin() {
         client_id: "",
         amount: "",
         details: "",
-        payment_method: "",
+        payment_method: "cash",
         paid_at: "",
         created_by: admin_id,
     });
@@ -169,7 +169,7 @@ function ViewAdmin() {
             client_id: id,
             amount: "",
             details: "",
-            payment_method: "",
+            payment_method: "cash",
             paid_at: "",
             created_by: admin_id,
         });
@@ -240,7 +240,7 @@ function ViewAdmin() {
         setIsEditing(false);
         setEditingPayment(null);
         setPaymentError("");
-        setPaymentForm({ property_id: "", client_id: "", amount: "", details: "", payment_method: "", paid_at: "" });
+        setPaymentForm({ property_id: "", client_id: "", amount: "", details: "", payment_method: "cash", paid_at: "" });
     };
 
     const toggleProperty = (id) => setOpenProperty(openProperty === id ? null : id);
