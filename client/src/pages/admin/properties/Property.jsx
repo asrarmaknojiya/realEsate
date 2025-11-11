@@ -113,70 +113,40 @@ const GetProperties = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.length > 0 ? (
-                filtered.map((p) => (
-                  <tr key={p.id} className="clickable-row" onClick={() => openDetails(p)}>
-                    <td>
-                      <img
-                        src={`/uploads/${p.image}`}
-                        alt={p.title}
-                        style={{ width: 80, height: 60, borderRadius: 8, objectFit: "cover" }}
-                      />
-                    </td>
-                    <td>{p.title}</td>
-                    <td
-                      style={{
-                        maxWidth: 300,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {p.description}
-                    </td>
-                    <td>{p.address}</td>
-                    <td style={{ fontWeight: 600, color: "var(--primary-btn-bg)" }}>
-                      ₹{p.price}
-                    </td>
-                    <td>
-                      <span
-                        className={`status ${
-                          p.status === "available"
-                            ? "published"
-                            : p.status === "reserved"
-                            ? "low-stock"
-                            : "out-of-stock"
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="actions">
-                      <IoPencil
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate("/admin/updateproperty", { state: { item: p } });
-                        }}
-                        style={{
-                          cursor: "pointer",
-                          fontSize: 20,
-                          color: "var(--primary-btn-bg)",
-                        }}
-                        title="Edit"
-                      />
-                      <MdDeleteForever
-                        onClick={(e) => openDeleteModal(p, e)}
-                        style={{
-                          cursor: "pointer",
-                          fontSize: 20,
-                          color: "var(--red-color)",
-                        }}
-                        title="Delete"
-                      />
-                    </td>
-                  </tr>
-                ))
-              ) : (
+              {filtered.length > 0 ? filtered.map(p => (
+                <tr key={p.id} className="clickable-row" onClick={() => openDetails(p)}>
+                  <td>
+                    <img
+                      src={`/uploads/${p.image}`}
+                      alt={p.title}
+                      style={{ width: 80, height: 60, borderRadius: 8, objectFit: "cover" }}
+                    />
+                  </td>
+                  <td>{p.title}</td>
+                  <td style={{ maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {p.description}
+                  </td>
+                  <td>{p.address}</td>
+                  <td style={{ fontWeight: 600, color: "var(--primary-btn-bg)" }}>₹{p.price}</td>
+                  <td>
+                    <span className={`status ${p.status === "available" ? "published" : p.status === "reserved" ? "low-stock" : "out-of-stock"}`}>
+                      {p.status}
+                    </span>
+                  </td>
+                  <td className="actions">
+                    <IoPencil
+                      onClick={(e) => { e.stopPropagation(); navigate("/admin/updateproperty", { state: { item: p } }); }}
+                      style={{ cursor: "pointer", fontSize: 20, color: "var(--primary-btn-bg)" }}
+                      title="Edit"
+                    />
+                    <MdDeleteForever
+                      onClick={(e) => handleDelete(p.id, e)}
+                      style={{ cursor: "pointer", fontSize: 20, color: "var(--red-color)" }}
+                      title="Delete"
+                    />
+                  </td>
+                </tr>
+              )) : (
                 <tr>
                   <td colSpan={8} style={{ textAlign: "center", padding: "40px", opacity: 0.6 }}>
                     No properties found

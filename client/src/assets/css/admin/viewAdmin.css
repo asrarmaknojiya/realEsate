@@ -1,23 +1,62 @@
+/* ──────────────────────────────────────────────────────────────
+   VIEW ADMIN - CLEANED & OPTIMIZED
+   ────────────────────────────────────────────────────────────── */
 * {
   font-family: "Inter", sans-serif;
+  box-sizing: border-box;
 }
 
-/* ====================== ROOT LAYOUT ====================== */
+/* Layout */
 .client-section {
-  /* padding: 28px; */
-  background: var(--light-white-color);
+  background: #f8fafc;
   min-height: 100vh;
   color: #1e293b;
 }
 
-/* Header */
-.client-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.view-admin-header {
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.header-back-btn,
+.client-add-sale-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.header-back-btn {
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #1e293b;
+}
+
+.header-back-btn:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.client-add-sale-btn {
+  background: linear-gradient(135deg, #4f6ef7, #3b82f6);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+}
+
+.client-add-sale-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(59,130,246,0.4);
 }
 
 .client-title {
@@ -27,9 +66,16 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin: 0;
 }
 
-/* ====================== SIDEBAR ====================== */
+/* Layout */
+.client-layout {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+}
+
 .client-sidebar {
   width: 400px;
   flex-shrink: 0;
@@ -43,231 +89,64 @@
   border-radius: 14px;
   padding: 20px;
   border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: all 0.2s;
 }
 
 .client-card:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
   transform: translateY(-2px);
 }
 
-.client-name {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  color: #1e293b;
-}
+.client-name { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+.client-subtext { font-size: 14px; color: #64748b; margin-bottom: 12px; font-weight: 500; }
+.client-contact-row { display: flex; align-items: center; gap: 10px; font-size: 15px; color: #475569; margin-bottom: 15px; }
+.client-contact-row svg { color: #4f6ef7; font-size: 18px; flex-shrink: 0; }
 
-.client-subtext {
-  font-size: 14px;
-  color: #64748b;
-  margin-bottom: 12px;
-  font-weight: 500;
-}
+.client-property-list { list-style: none; padding: 0; margin: 0; }
+.client-property-list li { padding: 10px 0; border-bottom: 1px dashed #e2e8f0; font-size: 14px; color: #475569; }
+.client-property-list li:last-child { border-bottom: none; }
 
-.client-contact-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0;
-  font-size: 15px;
-  color: #475569;
-  word-break: break-all;          /* <-- NEW */
-  overflow-wrap: anywhere;        /* <-- NEW */
-}
+/* Main */
+.client-main { flex: 1; min-width: 0; }
+.client-sale-box { background: white; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+.client-box-title { font-size: 22px; font-weight: 700; margin: 0 0 20px; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.client-box-title::before { content: "₹"; color: #22c55e; font-weight: bold; }
 
-/* keep the icon size consistent */
-.client-contact-row svg {
-  flex-shrink: 0;                 /* <-- NEW */
-  color: #4f6ef7;
-  font-size: 18px;
-}
-
-/* optional – a tiny helper for very long text */
-.client-contact-text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Property List */
-.client-property-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.client-property-list li {
-  padding: 10px 0;
-  border-bottom: 1px dashed #e2e8f0;
-  font-size: 14px;
-  color: #475569;
-}
-
-.client-property-list li:last-child {
-  border-bottom: none;
-}
-
-/* ====================== MAIN CONTENT ====================== */
-.client-layout {
-  display: flex;
-  gap: 24px;
-  margin-top: 20px;
-}
-
-.client-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.client-sale-box {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-}
-
-.client-box-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin: 0 0 20px 0;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.client-box-title::before {
-  content: "₹";
-  color: #22c55e;
-  font-weight: bold;
-}
-
-/* ====================== PROPERTY CARD ====================== */
 .client-property-sale {
   border: 1px solid #e2e8f0;
   border-radius: 14px;
   padding: 18px;
   margin-bottom: 16px;
   background: #fcfdff;
-  transition: all 0.3s ease;
   cursor: pointer;
+  transition: all 0.3s;
 }
 
 .client-property-sale:hover {
   border-color: #4f6ef7;
   background: #f8faff;
-  box-shadow: 0 6px 18px rgba(79, 110, 247, 0.12);
+  box-shadow: 0 6px 18px rgba(79,110,247,0.12);
   transform: translateY(-3px);
 }
 
-.client-property-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
+.client-property-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.client-property-name { font-weight: 700; font-size: 17px; color: #1e293b; }
+.client-property-date { font-size: 13px; color: #94a3b8; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; }
+.client-sale-price { font-size: 20px; font-weight: 700; color: #22c55e; margin: 8px 0; }
+.client-sale-plan { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 14px; color: #64748b; }
+.client-sale-note { flex: 1; margin: 0; line-height: 1.5; }
+.client-sale-plan svg { color: #4f6ef7; font-size: 18px; }
 
-.client-property-name {
-  font-weight: 700;
-  font-size: 17px;
-  color: #1e293b;
-}
+.client-transaction-box { margin-top: 20px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }
+.client-transaction-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.client-transaction-header h5 { margin: 0; font-size: 16px; font-weight: 600; color: #1e293b; }
 
-.client-property-date {
-  font-size: 13px;
-  color: #94a3b8;
-  background: #f1f5f9;
-  padding: 2px 8px;
-  border-radius: 6px;
-}
+.client-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 14px; }
+.client-table th { text-align: left; padding: 10px 8px; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+.client-table td { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; color: #475569; }
+.client-table tr:hover { background: #f8faff; }
 
-.client-sale-price {
-  font-size: 20px;
-  font-weight: 700;
-  color: #22c55e;
-  margin: 8px 0;
-}
-
-.client-sale-plan {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-  font-size: 14px;
-  color: #64748b;
-}
-
-.client-sale-note {
-  flex: 1;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.client-sale-plan svg {
-  color: #4f6ef7;
-  font-size: 18px;
-}
-
-/* ====================== TRANSACTION BOX ====================== */
-.client-transaction-box {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px dashed #cbd5e1;
-  animation: slideDown 0.3s ease forwards;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.client-transaction-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.client-transaction-header h5 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-/* ====================== TABLE ====================== */
-.client-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-.client-table th {
-  text-align: left;
-  padding: 10px 8px;
-  font-weight: 600;
-  color: #475569;
-  border-bottom: 2px solid #e2e8f0;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.client-table td {
-  padding: 12px 8px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #475569;
-}
-
-.client-table tr:hover {
-  background: #f8faff;
-}
-
-/* ====================== BADGES ====================== */
 .client-badge {
   padding: 4px 10px;
   border-radius: 20px;
@@ -276,102 +155,74 @@
   text-transform: capitalize;
 }
 
-.client-paid {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
+/* Action Buttons Group */
+.action-btn-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-.client-pending {
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  color: white;
-}
-
-/* ====================== BUTTONS ====================== */
-.client-add-sale-btn,
-.client-add-payment-btn,
-.client-mark-paid-btn {
-  background: linear-gradient(135deg, #4f6ef7, #3b82f6);
-  color: white;
+.client-download-btn,
+.client-delete-btn {
+  width: 36px;
+  height: 36px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 14px;
-  display: inline-flex;
+  border-radius: 8px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.client-mark-paid-btn {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-  padding: 8px 12px;
-  font-size: 13px;
-}
-
-.client-add-sale-btn:hover,
-.client-add-payment-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
-.client-mark-paid-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
-  background: linear-gradient(135deg, #16a34a, #15803d);
-}
-
-.payment-cancel {
-  background: #e2e8f0;
-  color: #475569;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 500;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.payment-cancel:hover {
-  background: #cbd5e1;
-}
-
-.payment-save {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+.client-download-btn {
+  background: #4f46e5;
   color: white;
-  padding: 10px 20px;
-  border-radius: 8px;
+}
+
+.client-download-btn:hover {
+  background: #4338ca;
+  transform: translateY(-1px);
+}
+
+.client-delete-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.client-delete-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Other Buttons */
+.client-add-payment-btn,
+.client-mark-paid-btn,
+.client-edit-btn {
+  padding: 8px 12px;
   border: none;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.payment-save:hover {
-  background: linear-gradient(135deg, #16a34a, #15803d);
-}
+.client-add-payment-btn { background: linear-gradient(135deg, #4f6ef7, #3b82f6); color: white; }
+.client-mark-paid-btn { background: #22c55e; color: white; }
+.client-edit-btn { background: #f97316; color: white; }
 
-/* ====================== MODALS ====================== */
+/* Modal */
 .payment-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0,0,0,0.5);
   backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }
 
 .payment-modal {
@@ -379,16 +230,8 @@
   width: 480px;
   max-width: 95%;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  z-index: 1001;
-}
-
-.better-modal {
-  padding: 32px !important;
-}
-
-.mark-paid-modal {
+  padding: 32px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -400,12 +243,7 @@
   margin-bottom: 20px;
 }
 
-.payment-modal-header h3 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  color: #1e293b;
-}
+.payment-modal-header h3 { margin: 0; font-size: 22px; font-weight: 700; color: #1e293b; }
 
 .payment-close-btn {
   background: #e2e8f0;
@@ -415,19 +253,12 @@
   height: 36px;
   border-radius: 50%;
   font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   cursor: pointer;
   transition: 0.2s;
 }
 
-.payment-close-btn:hover {
-  background: #cbd5e1;
-  color: #1e293b;
-}
+.payment-close-btn:hover { background: #cbd5e1; color: #1e293b; }
 
-/* ====================== FORM ====================== */
 .payment-input,
 .payment-textarea,
 select {
@@ -435,10 +266,9 @@ select {
   border: 1.5px solid #cbd5e1;
   padding: 12px 14px;
   border-radius: 10px;
-  margin: 10px 0 16px 0;
+  margin: 10px 0 16px;
   font-size: 15px;
   transition: all 0.2s;
-  box-sizing: border-box;
 }
 
 .payment-input:focus,
@@ -446,56 +276,18 @@ select {
 select:focus {
   outline: none;
   border-color: #4f6ef7;
-  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
+  box-shadow: 0 0 0 3px rgba(79,110,247,0.15);
 }
 
-.payment-input[readonly] {
-  background: #f8fafc;
-  color: #64748b;
-  cursor: not-allowed;
-}
+.payment-input[readonly] { background: #f8fafc; color: #64748b; cursor: not-allowed; }
 
-.payment-textarea {
-  height: 100px;
-  resize: none;
-  font-family: inherit;
-}
+.payment-textarea { height: 100px; resize: none; }
 
-label {
-  display: block;
-  font-weight: 600;
-  color: #475569;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
+label { font-weight: 600; color: #475569; font-size: 14px; margin-bottom: 4px; display: block; }
 
-/* ====================== SIGNATURE ====================== */
-.signature-pad {
-  width: 100%;
-  height: 180px;
-  border: 2px dashed #cbd5e1;
-  border-radius: 12px;
-  background: #f8fafc;
-  margin: 12px 0;
-}
+.signature-pad { width: 100%; height: 180px; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; margin: 12px 0; }
+.signature-clear-btn { background: #ef4444; color: white; padding: 8px 16px; border-radius: 8px; border: none; font-size: 13px; cursor: pointer; }
 
-.signature-clear-btn {
-  background: #ef4444;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.signature-clear-btn:hover {
-  background: #dc2626;
-}
-
-/* ====================== ACTIONS ====================== */
 .payment-modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -503,477 +295,32 @@ label {
   margin-top: 20px;
 }
 
-.reject-btn,
-.reject-submit-btn {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-  color: white !important;
-}
+.payment-cancel { background: #e2e8f0; color: #475569; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; }
+.payment-save { background: #22c55e; color: white; padding: 10px 20px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+.reject-btn, .reject-submit-btn { background: #ef4444 !important; }
 
-.reject-btn:hover,
-.reject-submit-btn:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
-}
+.error-text { color: #dc2626; margin: 0 0 12px; font-weight: 500; }
 
-/* ====================== ENHANCED RESPONSIVE DESIGN ====================== */
-
-/* ---------- MOBILE FIRST (≤640px) – STACK EVERYTHING ---------- */
+/* Responsive */
 @media (max-width: 640px) {
-  /* .client-section {
-    padding: 16px;
-  } */
-
-  .client-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .client-title {
-    font-size: 22px;
-  }
-
-  .client-add-sale-btn {
-    width: fit-content;
-    justify-content: center;
-  }
-
-  /* SIDEBAR VISIBLE ON MOBILE - STACKS ON TOP */
-  .client-layout {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .client-sidebar {
-    width: 100%;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .client-card {
-    padding: 16px;
-  }
-
-  .client-name {
-    font-size: 20px;
-  }
-
-  .client-contact-row {
-    font-size: 14px;
-  }
-
-  /* Main content */
-  .client-sale-box {
-    padding: 16px;
-  }
-
-  .client-box-title {
-    font-size: 18px;
-  }
-
-  .client-property-sale {
-    padding: 14px;
-  }
-
-  .client-property-header {
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .client-property-name {
-    font-size: 16px;
-  }
-
-  .client-sale-price {
-    font-size: 18px;
-  }
-
-  /* Transaction box improvements */
-  .client-transaction-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .client-transaction-header h5 {
-    font-size: 15px;
-  }
-
-  .client-add-payment-btn {
-     width: fit-content;
-  }
-
-  /* TABLE - Card style on mobile */
-  .client-table {
-    font-size: 13px;
-  }
-
-  .client-table thead {
-    display: none;
-  }
-
-  .client-table,
-  .client-table tbody,
-  .client-table tr,
-  .client-table td {
-    display: block;
-    width: 100%;
-  }
-
-  .client-table tr {
-    margin-bottom: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 12px;
-    background: white;
-  }
-
-  .client-table td {
-    padding: 8px 0;
-    border: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .client-table td::before {
-    content: attr(data-label);
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-  }
-
-  .client-table td:first-child::before {
-    content: "S.No";
-  }
-
-  .client-table td:nth-child(2)::before {
-    content: "Amount";
-  }
-
-  .client-table td:nth-child(3)::before {
-    content: "Status";
-  }
-
-  .client-table td:nth-child(4)::before {
-    content: "Payment Date";
-  }
-
-  .client-table td:last-child::before {
-    content: "Actions";
-  }
-
-  .client-mark-paid-btn {
-    width: fit-content;
-    margin-top: 8px;
-  }
-
-  /* Modal adjustments */
-  .payment-modal {
-    width: 100%;
-    max-width: calc(100% - 32px);
-    margin: 16px;
-  }
-
-  .better-modal {
-    padding: 20px !important;
-  }
-
-  .payment-modal-header h3 {
-    font-size: 18px;
-  }
-
-  .payment-modal-actions {
-    flex-direction: column-reverse;
-  }
-
-  .payment-modal-actions button {
-    width: 100%;
-  }
-
-  .signature-pad {
-    height: 150px;
-  }
-}
-
-/* ---------- SMALL TABLETS (641px - 768px) ---------- */
-@media (min-width: 641px) and (max-width: 768px) {
-  .client-section {
-    padding: 20px;
-  }
-
-  .client-layout {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .client-sidebar {
-    width: 100%;
-    flex-direction: row;
-    gap: 16px;
-  }
-
-  .client-card {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .client-property-header {
-    flex-wrap: wrap;
-  }
-
-  /* Table adjustments */
-  .client-table {
-    font-size: 13px;
-  }
-
-  .client-table th,
-  .client-table td {
-    padding: 10px 6px;
-  }
-}
-
-/* ---------- TABLETS (769px - 1024px) ---------- */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .client-section {
-    padding: 24px;
-  }
-
-  .client-layout {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .client-sidebar {
-    width: 100%;
-    flex-direction: row;
-    gap: 20px;
-  }
-
-  .client-card {
-    flex: 1;
-    min-width: 280px;
-  }
-
-  .client-sale-box {
-    padding: 20px;
-  }
-}
-
-/* ---------- LARGE TABLETS / SMALL LAPTOPS (1025px - 1280px) ---------- */
-@media (min-width: 1025px) and (max-width: 1280px) {
-  .client-sidebar {
-    width: 350px;
-  }
-
-  .client-section {
-    padding: 24px;
-  }
-}
-
-/* ---------- DESKTOP (≥1281px) - OPTIMAL LAYOUT ---------- */
-@media (min-width: 1281px) {
-  .client-sidebar {
-    width: 400px;
-  }
-
-  .client-section {
-    padding: 28px;
-  }
-}
-
-/* ---------- PRINT STYLES ---------- */
-@media print {
-  .client-add-sale-btn,
-  .client-add-payment-btn,
-  .client-mark-paid-btn,
-  .payment-close-btn {
-    display: none;
-  }
-
-  .client-section {
-    padding: 0;
-  }
-
-  .client-card {
-    box-shadow: none;
-    page-break-inside: avoid;
-  }
+  .client-layout { flex-direction: column; gap: 16px; }
+  .client-sidebar { width: 100%; }
+  .client-table thead { display: none; }
+  .client-table tr, .client-table td { display: block; width: 100%; }
+  .client-table tr { margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background: white; }
+  .client-table td { padding: 8px 0; display: flex; justify-content: space-between; align-items: center; }
+  .client-table td::before { content: attr(data-label); font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; }
+  .action-btn-group { justify-content: flex-start; gap: 8px; }
+  .client-download-btn, .client-delete-btn { width: 40px; height: 40px; }
+  .payment-modal { padding: 20px; margin: 16px; }
+  .payment-modal-actions { flex-direction: column-reverse; }
+  .payment-modal-actions button { width: 100%; }
 }
 
 
-/* -----------------------------------------------------------------
-   VIEW-ADMIN HEADER – exactly like the Property page
-   ----------------------------------------------------------------- */
-.view-admin-header {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--primary-border-color);
+@media (max-width: 396px){
+.client-transaction-header {
+  display: grid;
+  grid-column-start:auto;
 }
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-/* left side – back button */
-.header-top-left {
-  display: flex;
-  align-items: center;
-}
-
-/* right side – add sale button */
-.header-top-right {
-  display: flex;
-  align-items: center;
-}
-
-/* back button – same style as Property page */
-.header-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid var(--primary-border-color);
-  border-radius: 8px;
-  background: var(--white-color);
-  color: var(--black-color);
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-.header-back-btn:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-/* title – placed **below** the button row */
-.header-title {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.header-title .client-title {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-}
-
-/* -----------------------------------------------------------------
-   RESPONSIVE – keep the same look on mobile
-   ----------------------------------------------------------------- */
-@media (max-width: 640px) {
-  .header-top {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .header-top-left,
-  .header-top-right {
-    width: fit-content;
-  }
-  .header-back-btn,
-  .client-add-sale-btn {
-    width: fit-content;
-    justify-content: center;
-  }
-  .header-title .client-title {
-    font-size: 22px;
-  }
-}
-
-
-
-
-/* ====================== PAYMENT TABLE ENHANCEMENTS ====================== */
-.client-table td .payment-signature,
-.client-table td .payment-reject-reason {
-  margin-top: 10px;
-  padding: 8px 0;
-  border-top: 1px dashed #e2e8f0;
-}
-
-.payment-signature {
-  display: flex;
-  justify-content: center;
-}
-
-.signature-img {
-  height: 50px;
-  width: auto;
-  max-width: 140px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  object-fit: contain;
-  background: white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-
-.payment-reject-reason {
-  font-size: 13px;
-  color: #dc2626;
-  line-height: 1.4;
-  background: #fef2f2;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border-left: 3px solid #dc2626;
-}
-
-/* Action Buttons */
-.client-delete-btn,
-.client-edit-btn,
-.client-mark-paid-btn {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 6px;
-  display: inline-block;
-}
-
-.client-delete-btn { background: #ef4444; color: white; }
-.client-edit-btn { background: #f97316; color: white; }
-.client-mark-paid-btn { background: #22c55e; color: white; }
-
-.client-delete-btn:hover { background: #dc2626; }
-.client-edit-btn:hover { background: #ea580c; }
-.client-mark-paid-btn:hover { background: #16a34a; }
-
-/* ====================== MOBILE CARD VIEW ====================== */
-@media (max-width: 640px) {
-  .client-table tr {
-    position: relative;
-    padding-bottom: 16px;
-  }
-
-  .client-table td[data-label="Actions"] {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .payment-signature,
-  .payment-reject-reason {
-    width: 100%;
-    text-align: center;
-  }
-
-  .signature-img {
-    max-width: 100%;
-    height: 45px;
-  }
-
-  .client-delete-btn,
-  .client-edit-btn,
-  .client-mark-paid-btn {
-    width: 100%;
-    text-align: center;
-  }
 }
