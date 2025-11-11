@@ -25,6 +25,9 @@ function ViewAdmin() {
     const [properties, setProperties] = useState([]);
     const [clientPayments, setClientPayments] = useState([]);
 
+    // RESTORED: This was missing!
+    const [confirmationPayments, setConfirmationPayments] = useState({});
+
     const [selectedProperty, setSelectedProperty] = useState(null);
     const [selectedPayment, setSelectedPayment] = useState(null);
 
@@ -70,11 +73,15 @@ function ViewAdmin() {
         catch (err) { console.error("getClientPayments", err); }
     };
 
+    // RESTORED: Fixed function with proper state update
     const fetchConfirmationByPaymentId = async (paymentId) => {
         try {
-            const data = (await api.get(`${API_ROOT}/getConfirmationByPaymentId/${paymentId}`)).data[0];
+            const res = await api.get(`${API_ROOT}/getConfirmationByPaymentId/${paymentId}`);
+            const data = res.data[0];
             setConfirmationPayments(prev => ({ ...prev, [paymentId]: data }));
-        } catch (err) { console.error("fetchConfirmationByPaymentId", err); }
+        } catch (err) {
+            console.error("fetchConfirmationByPaymentId", err);
+        }
     };
 
     useEffect(() => {
@@ -446,6 +453,7 @@ function ViewAdmin() {
                 </div>
             </div>
 
+            {/* === MODALS (unchanged, same as before) === */}
             {/* Sale Modal */}
             {showSaleModal && (
                 <div className="payment-modal-overlay">
