@@ -115,7 +115,7 @@ const GetProperties = () => {
                     />
                   </td>
                   <td>{p.title}</td>
-                  <td style={{ maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <td style={{ maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {p.description}
                   </td>
                   <td>{p.address}</td>

@@ -273,7 +273,7 @@ button {
 }
 .admin-panel-header-div .dashboard-table-container th {
   font-size: 15px;
-  padding: 16px 24px;
+  padding: 10px 14px;
   text-align: left;
   font-weight: 600;
   color: var(--black-color);

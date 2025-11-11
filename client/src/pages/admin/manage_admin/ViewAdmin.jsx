@@ -1,8 +1,8 @@
+// src/pages/admin/ViewAdmin.jsx
 import React, { useState, useRef, useEffect } from "react";
 import "../../../assets/css/admin/viewAdmin.css";
 import SignaturePad from "react-signature-canvas";
-import { FaEnvelope, FaPhone } from "react-icons/fa";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa6";
+import { FaEnvelope, FaPhone, FaChevronDown, FaChevronUp, FaFileDownload, FaTrashAlt } from "react-icons/fa";
 import api from "../../../api/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -29,82 +29,52 @@ function ViewAdmin() {
     const [selectedPayment, setSelectedPayment] = useState(null);
 
     const [assignedForm, setAssignedForm] = useState({
-        property_id: "",
-        client_id: id,
-        assigned_by: admin_id || "",
-        amount: "",
-        details: "",
-        assigned_at: "",
+        property_id: "", client_id: id, assigned_by: admin_id || "", amount: "", details: "", assigned_at: "",
     });
     const [assignedError, setAssignedError] = useState("");
 
     const [paymentForm, setPaymentForm] = useState({
-        property_id: "",
-        client_id: "",
-        amount: "",
-        details: "",
-        payment_method: "cash",
-        paid_at: "",
-        created_by: admin_id,
+        property_id: "", client_id: "", amount: "", details: "", payment_method: "", paid_at: "", created_by: admin_id,
     });
-    const [paymenterror, setPaymentError] = useState("");
+    const [paymentError, setPaymentError] = useState("");
     const [isEditing, setIsEditing] = useState(false);
     const [editingPayment, setEditingPayment] = useState(null);
 
     const [markConfirmedAt, setMarkConfirmedAt] = useState("");
     const [rejectReason, setRejectReason] = useState("");
     const [markError, setMarkError] = useState("");
-    const [confirmationPayments, setConfirmationPayments] = useState({});
 
     const sigCanvas = useRef(null);
     const API_ROOT = "http://localhost:4500";
 
-    // Fetch Client Info
+    // ───────────────────────────── FETCHERS ─────────────────────────────
     const fetchClientInfo = async () => {
-        try {
-            const res = await api.get(`/admin/getUserById/${id}`);
-            setClientInfo(res.data);
-        } catch (error) {
-            console.error("fetchClientInfo", error);
-        }
+        try { setClientInfo((await api.get(`/admin/getUserById/${id}`)).data); }
+        catch (err) { console.error("fetchClientInfo", err); }
     };
 
     const fetchClientAssignProperties = async () => {
-        try {
-            const res = await api.get(`${API_ROOT}/getAssignedPropertyByClientId/${id}`);
-            setPropertId(res.data || []);
-        } catch (error) {
-            console.error("fetchClientAssignProperties", error);
-        }
+        try { setPropertId((await api.get(`${API_ROOT}/getAssignedPropertyByClientId/${id}`)).data || []); }
+        catch (err) { console.error("fetchClientAssignProperties", err); }
     };
 
     const assignProperties = async () => {
         try {
             const res = await api.get(`${API_ROOT}/getproperties`);
-            const available = (res.data || []).filter(p => p.status?.toLowerCase() === "available");
-            setProperties(available);
-        } catch (error) {
-            console.error("assignProperties", error);
-        }
+            setProperties((res.data || []).filter(p => p.status?.toLowerCase() === "available"));
+        } catch (err) { console.error("assignProperties", err); }
     };
 
     const getClientPayments = async () => {
-        try {
-            const res = await api.get(`${API_ROOT}/getPaymentsByClientId/${id}`);
-            setClientPayments(res.data || []);
-        } catch (error) {
-            console.error("getClientPayments", error);
-        }
+        try { setClientPayments((await api.get(`${API_ROOT}/getPaymentsByClientId/${id}`)).data || []); }
+        catch (err) { console.error("getClientPayments", err); }
     };
 
     const fetchConfirmationByPaymentId = async (paymentId) => {
         try {
-            const res = await api.get(`${API_ROOT}/getConfirmationByPaymentId/${paymentId}`);
-            const data = res.data[0];
+            const data = (await api.get(`${API_ROOT}/getConfirmationByPaymentId/${paymentId}`)).data[0];
             setConfirmationPayments(prev => ({ ...prev, [paymentId]: data }));
-        } catch (error) {
-            console.error("fetchConfirmationByPaymentId", error);
-        }
+        } catch (err) { console.error("fetchConfirmationByPaymentId", err); }
     };
 
     useEffect(() => {
@@ -115,63 +85,46 @@ function ViewAdmin() {
     }, [id]);
 
     useEffect(() => {
-        const fetchPropertiesById = async () => {
-            if (!propertId.length) {
-                setPropertiesDetail([]);
-                return;
-            }
-            const requests = propertId.map(p => api.get(`${API_ROOT}/getproperties/${p.property_id}`));
-            const responses = await Promise.all(requests);
+        const fetchProperties = async () => {
+            if (!propertId.length) { setPropertiesDetail([]); return; }
+            const responses = await Promise.all(propertId.map(p => api.get(`${API_ROOT}/getproperties/${p.property_id}`)));
             setPropertiesDetail(responses.map(r => r.data));
         };
-        fetchPropertiesById();
+        fetchProperties();
     }, [propertId]);
 
-    // Handlers
+    // ───────────────────────────── HANDLERS ─────────────────────────────
     const handleAssignProperty = (e) => setAssignedForm({ ...assignedForm, [e.target.name]: e.target.value });
 
     const handleAssignPropertySubmit = async (e) => {
         e.preventDefault();
-        if (!assignedForm.property_id || !assignedForm.client_id) {
-            setAssignedError("Property and Client are required");
-            return;
-        }
+        if (!assignedForm.property_id || !assignedForm.client_id) return setAssignedError("Property and Client required");
+
         try {
             await api.post(`${API_ROOT}/addassignedproperty`, {
                 property_id: assignedForm.property_id,
-                client_id: Number(assignedForm.client_id),
-                assigned_by: Number(assignedForm.assigned_by),
+                client_id: Number(id),
+                assigned_by: Number(admin_id),
                 amount: assignedForm.amount || null,
                 details: assignedForm.details || null,
                 assigned_at: assignedForm.assigned_at || null,
             });
-            alert("Property assigned successfully");
+            alert("Property assigned");
             await fetchClientAssignProperties();
             await assignProperties();
             setShowSaleModal(false);
             setAssignedForm({ property_id: "", client_id: id, assigned_by: admin_id, amount: "", details: "", assigned_at: "" });
-        } catch (err) {
-            setAssignedError("Failed to assign property");
-        }
+        } catch { setAssignedError("Failed to assign"); }
     };
 
-    const handlePayment = (e) => {
-        const { name, value } = e.target;
-        setPaymentForm(prev => ({ ...prev, [name]: value }));
-    };
+    const handlePayment = (e) => setPaymentForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
     const handleOpenAddPayment = (property) => {
         setIsEditing(false);
         setEditingPayment(null);
         setSelectedProperty(property);
         setPaymentForm({
-            property_id: property.id,
-            client_id: id,
-            amount: "",
-            details: "",
-            payment_method: "cash",
-            paid_at: "",
-            created_by: admin_id,
+            property_id: property.id, client_id: id, amount: "", details: "", payment_method: "", paid_at: "", created_by: admin_id,
         });
         setShowPaymentModal(true);
     };
@@ -194,11 +147,12 @@ function ViewAdmin() {
 
     const handleAddPayment = async (e) => {
         e.preventDefault();
-        if (!paymentForm.property_id || !paymentForm.client_id) return setPaymentError("Property and Client are required");
+        if (!paymentForm.property_id || !paymentForm.client_id) return setPaymentError("Required fields missing");
+
         try {
             await api.post(`${API_ROOT}/addpayment`, {
                 property_id: paymentForm.property_id,
-                client_id: Number(paymentForm.client_id),
+                client_id: Number(id),
                 amount: paymentForm.amount || null,
                 payment_method: paymentForm.payment_method || "cash",
                 paid_at: paymentForm.paid_at || new Date().toISOString(),
@@ -206,17 +160,16 @@ function ViewAdmin() {
                 status: "pending",
                 created_by: admin_id,
             });
-            alert("Payment added successfully");
+            alert("Payment added");
             await getClientPayments();
             closePaymentModal();
-        } catch (err) {
-            setPaymentError("Failed to add payment");
-        }
+        } catch { setPaymentError("Failed to add"); }
     };
 
     const handleUpdatePayment = async (e) => {
         e.preventDefault();
         if (!editingPayment) return;
+
         try {
             await api.put(`${API_ROOT}/updatepayment/${editingPayment.id}`, {
                 property_id: paymentForm.property_id,
@@ -227,12 +180,10 @@ function ViewAdmin() {
                 notes: paymentForm.details || null,
                 paid_at: paymentForm.paid_at ? paymentForm.paid_at.replace("T", " ") : null,
             });
-            alert("Payment updated successfully");
+            alert("Payment updated");
             await getClientPayments();
             closePaymentModal();
-        } catch (err) {
-            alert("Failed to update payment");
-        }
+        } catch { alert("Update failed"); }
     };
 
     const closePaymentModal = () => {
@@ -248,10 +199,8 @@ function ViewAdmin() {
     const openMarkPaidForPayment = (e, payment) => {
         e.stopPropagation();
         setSelectedPayment(payment);
-        const prop = propertiesDetail.find(p => p.id === payment.property_id) || null;
-        setSelectedProperty(prop);
-        const now = new Date().toISOString().slice(0, 16);
-        setMarkConfirmedAt(now);
+        setSelectedProperty(propertiesDetail.find(p => p.id === payment.property_id) || null);
+        setMarkConfirmedAt(new Date().toISOString().slice(0, 16));
         setRejectReason("");
         setShowRejectComment(false);
         setMarkError("");
@@ -259,22 +208,15 @@ function ViewAdmin() {
     };
 
     const getSignatureBlob = async () => {
-        if (!sigCanvas.current) throw new Error("Signature pad missing");
-        let canvasEl;
-        try {
-            canvasEl = sigCanvas.current.getTrimmedCanvas();
-        } catch {
-            canvasEl = sigCanvas.current.getCanvas();
-        }
-        return await new Promise(resolve => canvasEl.toBlob(resolve, "image/png"));
+        if (!sigCanvas.current?.getTrimmedCanvas) return null;
+        const canvas = sigCanvas.current.getTrimmedCanvas();
+        return await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
     };
 
     const handleConfirmAndMarkPaid = async () => {
         setMarkError("");
-        if (!selectedPayment || sigCanvas.current.isEmpty()) {
-            setMarkError("Signature required");
-            return;
-        }
+        if (!selectedPayment || sigCanvas.current?.isEmpty()) return setMarkError("Signature required");
+
         try {
             const blob = await getSignatureBlob();
             const fd = new FormData();
@@ -284,33 +226,25 @@ function ViewAdmin() {
             fd.append("status", "confirmed");
             fd.append("confirmed_at", markConfirmedAt.replace("T", " "));
             fd.append("reject_reason", "");
-            fd.append("signature", blob, `signature_${Date.now()}.png`);
+            fd.append("signature", blob, `sig_${Date.now()}.png`);
 
-            await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
+            await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, { headers: { "Content-Type": "multipart/form-data" } });
             await api.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, {
-                status: "completed",
-                paid_at: markConfirmedAt.replace("T", " "),
+                status: "completed", paid_at: markConfirmedAt.replace("T", " "),
             });
 
-            alert("Payment confirmed & marked paid");
+            alert("Payment confirmed");
             setShowMarkPaidModal(false);
             sigCanvas.current.clear();
             setSelectedPayment(null);
             await getClientPayments();
-        } catch (err) {
-            setMarkError("Failed to confirm payment");
-        }
+        } catch { setMarkError("Confirmation failed"); }
     };
 
     const handleSubmitRejection = async () => {
         setMarkError("");
-        if (!selectedPayment || !rejectReason.trim()) {
-            setMarkError("Rejection reason required");
-            return;
-        }
+        if (!rejectReason.trim()) return setMarkError("Reason required");
+
         try {
             const fd = new FormData();
             fd.append("payment_id", selectedPayment.id);
@@ -320,12 +254,7 @@ function ViewAdmin() {
             fd.append("confirmed_at", markConfirmedAt.replace("T", " ") || null);
             fd.append("reject_reason", rejectReason);
 
-           
-
-            await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
+            await api.post(`${API_ROOT}/addpaymentconfirmation`, fd, { headers: { "Content-Type": "multipart/form-data" } });
             await api.put(`${API_ROOT}/updatepayment/${selectedPayment.id}`, { status: "rejected" });
 
             alert("Payment rejected");
@@ -334,9 +263,7 @@ function ViewAdmin() {
             sigCanvas.current.clear();
             setSelectedPayment(null);
             await getClientPayments();
-        } catch (err) {
-            setMarkError("Failed to submit rejection");
-        }
+        } catch { setMarkError("Rejection failed"); }
     };
 
     const handleUpdatePaymentStatus = async (paymentId) => {
@@ -345,20 +272,29 @@ function ViewAdmin() {
             await api.put(`${API_ROOT}/updatePaymentStatus/${paymentId}`, { status: "refunded" });
             alert("Payment deleted");
             await getClientPayments();
-        } catch (error) {
-            alert("Failed to delete");
-        }
+        } catch { alert("Delete failed"); }
     };
 
+    const handleDownloadInvoice = async (paymentId) => {
+        try {
+            const res = await api.get(`${API_ROOT}/generateInvoice/${paymentId}`, { responseType: "blob" });
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `invoice_${paymentId}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        } catch { alert("Download failed"); }
+    };
+
+    // ───────────────────────────── RENDER ─────────────────────────────
     return (
         <>
             <div className="client-section">
                 <div className="view-admin-header">
                     <div className="header-top">
                         <div className="header-top-left">
-                            <button className="header-back-btn" onClick={() => navigate(-1)}>
-                                Back
-                            </button>
+                            <button className="header-back-btn" onClick={() => navigate(-1)}>Back</button>
                         </div>
                         <div className="header-top-right">
                             {user_role === "admin" && (
@@ -384,9 +320,9 @@ function ViewAdmin() {
                         <div className="client-card">
                             <h4 className="client-subtext">Associated Properties</h4>
                             <ul className="client-property-list">
-                                {propertiesDetail.length > 0 ? (
-                                    propertiesDetail.map((p, i) => <li key={i}>{p.title} — {p.address}</li>)
-                                ) : <li>No Properties Assigned</li>}
+                                {propertiesDetail.length > 0 ? propertiesDetail.map((p, i) => (
+                                    <li key={i}>{p.title} — {p.address}</li>
+                                )) : <li>No Properties Assigned</li>}
                             </ul>
                         </div>
                     </div>
@@ -396,6 +332,7 @@ function ViewAdmin() {
                             <h4 className="client-box-title">Sales & Payments</h4>
                             {propertiesDetail.length > 0 ? propertiesDetail.map((p, i) => (
                                 <div
+                                    key={i}
                                     className="client-property-sale"
                                     onClick={() => {
                                         toggleProperty(p.id);
@@ -403,7 +340,6 @@ function ViewAdmin() {
                                             .filter(pay => pay.property_id === p.id)
                                             .forEach(pay => fetchConfirmationByPaymentId(pay.id));
                                     }}
-                                    key={i}
                                 >
                                     <div className="client-property-header">
                                         <span className="client-property-name">{p.title}</span>
@@ -438,70 +374,66 @@ function ViewAdmin() {
                                                 </thead>
                                                 <tbody>
                                                     {clientPayments.filter(pay => pay.property_id === p.id).length > 0 ? (
-                                                        clientPayments.filter(pay => pay.property_id === p.id).map((pay, idx) => {
-                                                            const confirm = confirmationPayments?.[pay.id];
-                                                            return (
-                                                                <tr key={pay.id} onClick={() => fetchConfirmationByPaymentId(pay.id)}>
-                                                                    <td data-label="S.No">{idx + 1}</td>
-                                                                    <td data-label="Amount">₹{Number(pay.amount).toLocaleString()}</td>
-                                                                    <td data-label="Status">
-                                                                        <span
-                                                                            className="client-badge"
-                                                                            style={{
-                                                                                backgroundColor:
-                                                                                    pay.status === "completed" ? "#22c55e" :
-                                                                                        pay.status === "rejected" ? "#ef4444" :
-                                                                                            pay.status === "refunded" ? "#6b7280" :
-                                                                                                "#f97316",
-                                                                                color: pay.status === "pending" ? "black" : "white",
-                                                                            }}
-                                                                        >
-                                                                            {pay.status}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td data-label="Payment Date">
-                                                                        {pay.paid_at ? new Date(pay.paid_at).toLocaleDateString("en-IN") : "—"}
-                                                                    </td>
-                                                                    <td data-label="Actions" onClick={(e) => e.stopPropagation()}>
-                                                                        {pay.status === "refunded" ? null : (
-                                                                            pay.status === "completed" || pay.status === "rejected" ? (
-                                                                                user_role === "admin"?   (
-                                                                                    <button className="client-delete-btn" onClick={() => handleUpdatePaymentStatus(pay.id)}>
-                                                                                        Delete
+                                                        clientPayments.filter(pay => pay.property_id === p.id).map((pay, idx) => (
+                                                            <tr key={pay.id}>
+                                                                <td data-label="S.No">{idx + 1}</td>
+                                                                <td data-label="Amount">₹{Number(pay.amount).toLocaleString()}</td>
+                                                                <td data-label="Status">
+                                                                    <span
+                                                                        className="client-badge"
+                                                                        style={{
+                                                                            backgroundColor: pay.status === "completed" ? "#22c55e" :
+                                                                                pay.status === "rejected" ? "#ef4444" :
+                                                                                    pay.status === "refunded" ? "#6b7280" : "#f97316",
+                                                                            color: pay.status === "pending" ? "black" : "white",
+                                                                        }}
+                                                                    >
+                                                                        {pay.status}
+                                                                    </span>
+                                                                </td>
+                                                                <td data-label="Payment Date">
+                                                                    {pay.paid_at ? new Date(pay.paid_at).toLocaleDateString("en-IN") : "—"}
+                                                                </td>
+                                                                <td data-label="Actions" onClick={e => e.stopPropagation()}>
+                                                                    {pay.status === "refunded" ? null : (
+                                                                        pay.status === "completed" || pay.status === "rejected" ? (
+                                                                            user_role === "admin" ? (
+                                                                                <div className="action-btn-group">
+                                                                                    {pay.status === "completed" && (
+                                                                                        <button
+                                                                                            className="client-download-btn"
+                                                                                            onClick={() => handleDownloadInvoice(pay.id)}
+                                                                                            title="Download Invoice"
+                                                                                        >
+                                                                                            <FaFileDownload />
+                                                                                        </button>
+                                                                                    )}
+                                                                                    <button
+                                                                                        className="client-delete-btn"
+                                                                                        onClick={() => handleUpdatePaymentStatus(pay.id)}
+                                                                                        title="Delete Payment"
+                                                                                    >
+                                                                                        <FaTrashAlt />
                                                                                     </button>
-                                                                                ):(
-                                                                                    <></>
-                                                                                )
+                                                                                </div>
+                                                                            ) : null
+                                                                        ) : (
+                                                                            pay.created_by == admin_id ? (
+                                                                                <button className="client-edit-btn" onClick={(e) => handleEditPayment(e, pay)}>
+                                                                                    Edit
+                                                                                </button>
                                                                             ) : (
-                                                                                pay.created_by == admin_id ? (
-                                                                                    <button className="client-edit-btn" onClick={(e) => handleEditPayment(e, pay)}>
-                                                                                        Edit
-                                                                                    </button>
-                                                                                ) : (
-                                                                                    <button className="client-mark-paid-btn" onClick={(e) => openMarkPaidForPayment(e, pay)}>
-                                                                                        Mark Paid
-                                                                                    </button>
-                                                                                )
+                                                                                <button className="client-mark-paid-btn" onClick={(e) => openMarkPaidForPayment(e, pay)}>
+                                                                                    Mark Paid
+                                                                                </button>
                                                                             )
-                                                                        )}
-
-                                                                        {pay.status === "completed" && confirm?.signature && (
-                                                                            <div className="payment-signature">
-                                                                                <img src={`/uploads/${confirm.signature}`} alt="Signature" className="signature-img" />
-                                                                            </div>
-                                                                        )}
-
-                                                                        {pay.status === "rejected" && confirm?.reject_reason && (
-                                                                            <div className="payment-reject-reason">
-                                                                                <strong>Reason:</strong> {confirm.reject_reason}
-                                                                            </div>
-                                                                        )}
-                                                                    </td>
-                                                                </tr>
-                                                            );
-                                                        })
+                                                                        )
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))
                                                     ) : (
-                                                        <tr><td colSpan={5} className="empty-state">No payments for this property</td></tr>
+                                                        <tr><td colSpan={5} className="empty-state">No payments</td></tr>
                                                     )}
                                                 </tbody>
                                             </table>
@@ -514,152 +446,104 @@ function ViewAdmin() {
                 </div>
             </div>
 
-            {/* ===================== SALE MODAL (unchanged) ===================== */}
-            {
-                showSaleModal && (
-                    <div className="payment-modal-overlay">
-                        <div className="payment-modal better-modal mark-paid-modal">
-                            <div className="payment-modal-header">
-                                <h3>Record a New Sale</h3>
-                                <button className="payment-close-btn" onClick={() => setShowSaleModal(false)}>✕</button>
-                            </div>
-
-                            {assignedError && <div style={{ color: "crimson", marginBottom: 10 }}>{assignedError}</div>}
-
-                            <select name="property_id" value={assignedForm.property_id} onChange={handleAssignProperty}>
-                                <option value="">-- select property --</option>
-                                {properties.map((p) => <option key={p.id} value={p.id}>{p.title} — ₹{p.price}</option>)}
-                            </select>
-
-                            <input className="payment-input" name="amount" value={assignedForm.amount} onChange={handleAssignProperty} placeholder="Amount" />
-
-                            <input className="payment-input" type="datetime-local" name="assigned_at" value={assignedForm.assigned_at} onChange={handleAssignProperty} />
-
-                            <textarea className="payment-textarea" name="details" value={assignedForm.details} onChange={handleAssignProperty} placeholder="Details" />
-
-                            <div className="payment-modal-actions">
-                                <button className="payment-cancel" onClick={() => setShowSaleModal(false)}>Cancel</button>
-                                <button className="payment-save" onClick={handleAssignPropertySubmit}>Save Sale</button>
-                            </div>
+            {/* Sale Modal */}
+            {showSaleModal && (
+                <div className="payment-modal-overlay">
+                    <div className="payment-modal">
+                        <div className="payment-modal-header">
+                            <h3>Record a New Sale</h3>
+                            <button className="payment-close-btn" onClick={() => setShowSaleModal(false)}>×</button>
+                        </div>
+                        {assignedError && <p className="error-text">{assignedError}</p>}
+                        <select name="property_id" value={assignedForm.property_id} onChange={handleAssignProperty}>
+                            <option value="">-- select property --</option>
+                            {properties.map(p => <option key={p.id} value={p.id}>{p.title} — ₹{p.price}</option>)}
+                        </select>
+                        <input className="payment-input" name="amount" value={assignedForm.amount} onChange={handleAssignProperty} placeholder="Amount" />
+                        <input className="payment-input" type="datetime-local" name="assigned_at" value={assignedForm.assigned_at} onChange={handleAssignProperty} />
+                        <textarea className="payment-textarea" name="details" value={assignedForm.details} onChange={handleAssignProperty} placeholder="Details" />
+                        <div className="payment-modal-actions">
+                            <button className="payment-cancel" onClick={() => setShowSaleModal(false)}>Cancel</button>
+                            <button className="payment-save" onClick={handleAssignPropertySubmit}>Save Sale</button>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
 
-            {/* ===================== PAYMENT MODAL (unchanged) ===================== */}
-            {
-                showPaymentModal && (
-                    <div className="payment-modal-overlay">
-                        <div className="payment-modal better-modal mark-paid-modal">
-                            <div className="payment-modal-header">
-                                <h3>{isEditing ? "Edit Payment" : "Record a New Payment"}</h3>
-                                <button className="payment-close-btn" onClick={closePaymentModal}>✕</button>
-                            </div>
-
-                            {paymenterror && <p style={{ color: "crimson", fontWeight: 500 }}>{paymenterror}</p>}
-
-                            <label>Client</label>
-                            <input className="payment-input" value={clientInfo.name || ""} readOnly style={{ backgroundColor: "#f5f5f5" }} />
-
-                            <label>Property</label>
-                            <input className="payment-input" value={selectedProperty?.title || ""} readOnly style={{ backgroundColor: "#f5f5f5" }} />
-
-                            <label>Amount</label>
-                            <input className="payment-input" type="number" name="amount" value={paymentForm.amount} onChange={handlePayment} placeholder="Enter amount" />
-
-                            <label>Payment Method</label>
-                            <select className="payment-input" name="payment_method" value={paymentForm.payment_method} onChange={handlePayment}>
-                                <option value="">-- select --</option>
-                                <option value="cash">Cash</option>
-                                <option value="upi">UPI</option>
-                                <option value="bank_transfer">Bank Transfer</option>
-                                <option value="cheque">Cheque</option>
-                                <option value="card">Card</option>
-                            </select>
-
-                            <label>Payment Date</label>
-                            <input className="payment-input" type="datetime-local" name="paid_at" value={paymentForm.paid_at} onChange={handlePayment} />
-
-                            <textarea className="payment-textarea" name="details" value={paymentForm.details} onChange={handlePayment} placeholder="Description (Optional)" />
-
-                            <div className="payment-modal-actions">
-                                <button className="payment-cancel" onClick={closePaymentModal}>Cancel</button>
-                                <button className="payment-save" onClick={isEditing ? handleUpdatePayment : handleAddPayment}>
-                                    {isEditing ? "Update Payment" : "Save Payment"}
-                                </button>
-                            </div>
+            {/* Payment Modal */}
+            {showPaymentModal && (
+                <div className="payment-modal-overlay">
+                    <div className="payment-modal">
+                        <div className="payment-modal-header">
+                            <h3>{isEditing ? "Edit Payment" : "Record Payment"}</h3>
+                            <button className="payment-close-btn" onClick={closePaymentModal}>×</button>
+                        </div>
+                        {paymentError && <p className="error-text">{paymentError}</p>}
+                        <label>Client</label>
+                        <input className="payment-input" value={clientInfo.name || ""} readOnly />
+                        <label>Property</label>
+                        <input className="payment-input" value={selectedProperty?.title || ""} readOnly />
+                        <label>Amount</label>
+                        <input className="payment-input" type="number" name="amount" value={paymentForm.amount} onChange={handlePayment} />
+                        <label>Payment Method</label>
+                        <select className="payment-input" name="payment_method" value={paymentForm.payment_method} onChange={handlePayment}>
+                            <option value="">-- select --</option>
+                            <option value="cash">Cash</option>
+                            <option value="upi">UPI</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="card">Card</option>
+                        </select>
+                        <label>Payment Date</label>
+                        <input className="payment-input" type="datetime-local" name="paid_at" value={paymentForm.paid_at} onChange={handlePayment} />
+                        <textarea className="payment-textarea" name="details" value={paymentForm.details} onChange={handlePayment} placeholder="Notes" />
+                        <div className="payment-modal-actions">
+                            <button className="payment-cancel" onClick={closePaymentModal}>Cancel</button>
+                            <button className="payment-save" onClick={isEditing ? handleUpdatePayment : handleAddPayment}>
+                                {isEditing ? "Update" : "Save"}
+                            </button>
                         </div>
                     </div>
-                )
-            }
+                </div>
+            )}
 
-            {/* ===================== MARK PAID / REJECT MODAL (wired up) ===================== */}
-            {
-                showMarkPaidModal && (
-                    <div className="payment-modal-overlay">
-                        <div className="payment-modal better-modal mark-paid-modal">
-                            <div className="payment-modal-header">
-                                <h3>{showRejectComment ? "Reject Payment" : "Confirm Payment"}</h3>
-                                <button className="payment-close-btn" onClick={() => { setShowRejectComment(false); setShowMarkPaidModal(false); }}>
-                                    ✕
-                                </button>
-                            </div>
-
-                            {/* show any errors */}
-                            {markError && <div style={{ color: "crimson", marginBottom: 8 }}>{markError}</div>}
-
-                            {!showRejectComment ? (
-                                <>
-                                    <label>Confirm Date & Time</label>
-                                    <input
-                                        className="payment-input"
-                                        type="datetime-local"
-                                        value={markConfirmedAt}
-                                        onChange={(e) => setMarkConfirmedAt(e.target.value)}
-                                    />
-
-                                    <label>Client</label>
-                                    <input className="payment-input" type="text" value={clientInfo.name || ""} readOnly />
-
-                                    <label>Property</label>
-                                    <input className="payment-input" type="text" value={selectedProperty?.title || ""} readOnly />
-
-                                    <label>Amount</label>
-                                    <input className="payment-input" type="text" value={`₹${selectedPayment?.amount || ""}`} readOnly />
-
-                                    <label>Signature</label>
-                                    <SignaturePad ref={sigCanvas} penColor="black" canvasProps={{ className: "signature-pad" }} />
-                                    <button className="signature-clear-btn" onClick={() => sigCanvas.current.clear()}>Clear</button>
-
-                                    <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-                                        <button className="payment-cancel reject-btn" onClick={() => setShowRejectComment(true)}>Reject</button>
-                                        <button className="payment-save" onClick={handleConfirmAndMarkPaid}>Confirm & Mark Paid</button>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <label>Rejection Reason</label>
-                                    <textarea
-                                        className="payment-textarea"
-                                        value={rejectReason}
-                                        onChange={(e) => setRejectReason(e.target.value)}
-                                        placeholder="Why are you rejecting this payment?"
-                                    />
-
-                                    {/* <label>Optional Signature (sign to confirm rejection)</label>
-                                    <SignaturePad ref={sigCanvas} penColor="black" canvasProps={{ className: "signature-pad" }} />
-                                    <button className="signature-clear-btn" onClick={() => sigCanvas.current.clear()}>Clear</button> */}
-
-                                    <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-                                        <button className="payment-cancel" onClick={() => setShowRejectComment(false)}>Back</button>
-                                        <button className="payment-save reject-submit-btn" onClick={handleSubmitRejection}>Submit Rejection</button>
-                                    </div>
-                                </>
-                            )}
+            {/* Mark Paid / Reject Modal */}
+            {showMarkPaidModal && (
+                <div className="payment-modal-overlay">
+                    <div className="payment-modal mark-paid-modal">
+                        <div className="payment-modal-header">
+                            <h3>{showRejectComment ? "Reject Payment" : "Confirm Payment"}</h3>
+                            <button className="payment-close-btn" onClick={() => { setShowRejectComment(false); setShowMarkPaidModal(false); }}>×</button>
                         </div>
+                        {markError && <p className="error-text">{markError}</p>}
+                        {!showRejectComment ? (
+                            <>
+                                <label>Confirm Date & Time</label>
+                                <input className="payment-input" type="datetime-local" value={markConfirmedAt} onChange={e => setMarkConfirmedAt(e.target.value)} />
+                                <label>Client</label><input className="payment-input" value={clientInfo.name || ""} readOnly />
+                                <label>Property</label><input className="payment-input" value={selectedProperty?.title || ""} readOnly />
+                                <label>Amount</label><input className="payment-input" value={`₹${selectedPayment?.amount || ""}`} readOnly />
+                                <label>Signature</label>
+                                <SignaturePad ref={sigCanvas} penColor="black" canvasProps={{ className: "signature-pad" }} />
+                                <button className="signature-clear-btn" onClick={() => sigCanvas.current.clear()}>Clear</button>
+                                <div className="payment-modal-actions">
+                                    <button className="payment-cancel reject-btn" onClick={() => setShowRejectComment(true)}>Reject</button>
+                                    <button className="payment-save" onClick={handleConfirmAndMarkPaid}>Confirm</button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <label>Rejection Reason</label>
+                                <textarea className="payment-textarea" value={rejectReason} onChange={e => setRejectReason(e.target.value)} placeholder="Why rejecting?" />
+                                <div className="payment-modal-actions">
+                                    <button className="payment-cancel" onClick={() => setShowRejectComment(false)}>Back</button>
+                                    <button className="payment-save reject-submit-btn" onClick={handleSubmitRejection}>Submit</button>
+                                </div>
+                            </>
+                        )}
                     </div>
-                )
-            }
+                </div>
+            )}
         </>
     );
 }
