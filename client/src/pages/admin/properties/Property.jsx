@@ -1,4 +1,3 @@
-// client/src/pages/admin/properties/GetProperties.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Breadcrumb from "../layout/Breadcrumb";
@@ -8,7 +7,7 @@ import "../../../assets/css/admin-card.css";
 import api from "../../../api/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import DeleteConfirmModal from "../../../components/modals/DeleteConfirmModal";
+import DeleteConfirmModal from "../../../components/modals/DeleteConfirmModal"; // ✅ your modal
 
 const GetProperties = () => {
   const [properties, setProperties] = useState([]);
@@ -22,6 +21,7 @@ const GetProperties = () => {
 
   const navigate = useNavigate();
 
+  // 🟩 Fetch properties
   const fetchProperties = async () => {
     try {
       const res = await api.get("http://localhost:4500/getproperties");
@@ -32,6 +32,7 @@ const GetProperties = () => {
     }
   };
 
+  // 🟩 Fetch assigned (if needed)
   const fetchAssignments = async () => {
     try {
       await api.get("http://localhost:4500/getassignedproperties");
@@ -45,6 +46,7 @@ const GetProperties = () => {
     fetchAssignments();
   }, []);
 
+  // 🟩 Responsive checks
   useEffect(() => {
     const onResize = () => {
       const width = window.innerWidth;
@@ -56,35 +58,36 @@ const GetProperties = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // open modal instead of confirm()
-  const openDeleteModal = (p, e) => {
-    if (e && typeof e.stopPropagation === "function") e.stopPropagation();
-    setSelectedProperty(p);
+  // 🟥 Open modal
+  const openDeleteModal = (property, e) => {
+    e.stopPropagation();
+    setSelectedProperty(property);
     setDeleteModalOpen(true);
   };
 
-  // confirmDelete will be called by modal when code matches
+  // 🟨 Confirm delete
   const confirmDelete = async () => {
-    if (!selectedProperty) {
-      toast.error("No property selected");
-      setDeleteModalOpen(false);
-      return;
-    }
+    if (!selectedProperty) return toast.error("No property selected");
+
     try {
       await api.delete(`http://localhost:4500/deleteproperty/${selectedProperty.id}`);
-      toast.success("Property deleted successfully");
-      setDeleteModalOpen(false);
-      setSelectedProperty(null);
+      toast.success("Property deleted successfully ✅");
       await fetchProperties();
     } catch (err) {
       console.error("Delete error:", err);
-      toast.error("Failed to delete property");
+      toast.error("Failed to delete property ❌");
+    } finally {
+      setDeleteModalOpen(false);
+      setSelectedProperty(null);
     }
   };
 
-  const openDetails = (p) => navigate(`/admin/property/${p.id}`, { state: { item: p } });
+  // 🟦 View details
+  const openDetails = (property) =>
+    navigate(`/admin/property/${property.id}`, { state: { item: property } });
 
-  const filtered = properties.filter(p =>
+  // 🟧 Tabs filter
+  const filtered = properties.filter((p) =>
     activeTab === "All"
       ? true
       : activeTab === "Available"
@@ -105,7 +108,7 @@ const GetProperties = () => {
       />
 
       {/* Desktop Table */}
-      {(!isMobile && !isTablet) && (
+      {!isMobile && !isTablet && (
         <div className="dashboard-table-container">
           <table>
             <thead>
@@ -120,42 +123,89 @@ const GetProperties = () => {
               </tr>
             </thead>
             <tbody>
-              {filtered.length > 0 ? filtered.map(p => (
-                <tr key={p.id} className="clickable-row" onClick={() => openDetails(p)}>
-                  <td>
-                    <img
-                      src={`/uploads/${p.image}`}
-                      alt={p.title}
-                      style={{ width: 80, height: 60, borderRadius: 8, objectFit: "cover" }}
-                    />
-                  </td>
-                  <td>{p.title}</td>
-                  <td style={{ maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {p.description}
-                  </td>
-                  <td>{p.address}</td>
-                  <td style={{ fontWeight: 600, color: "var(--primary-btn-bg)" }}>₹{p.price}</td>
-                  <td>
-                    <span className={`status ${p.status === "available" ? "published" : p.status === "reserved" ? "low-stock" : "out-of-stock"}`}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="actions">
-                    <IoPencil
-                      onClick={(e) => { e.stopPropagation(); navigate("/admin/updateproperty", { state: { item: p } }); }}
-                      style={{ cursor: "pointer", fontSize: 20, color: "var(--primary-btn-bg)" }}
-                      title="Edit"
-                    />
-                    <MdDeleteForever
-                      onClick={(e) => openDeleteModal(p, e)}          // <-- FIXED: use openDeleteModal
-                      style={{ cursor: "pointer", fontSize: 20, color: "var(--red-color)" }}
-                      title="Delete"
-                    />
-                  </td>
-                </tr>
-              )) : (
+              {filtered.length > 0 ? (
+                filtered.map((p) => (
+                  <tr key={p.id} className="clickable-row" onClick={() => openDetails(p)}>
+                    <td>
+                      <img
+                        src={`/uploads/${p.image}`}
+                        alt={p.title}
+                        style={{
+                          width: 80,
+                          height: 60,
+                          borderRadius: 8,
+                          objectFit: "cover",
+                        }}
+                      />
+                    </td>
+                    <td>{p.title}</td>
+                    <td
+                      style={{
+                        maxWidth: 300,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {p.description}
+                    </td>
+                    <td>{p.address}</td>
+                    <td
+                      style={{
+                        fontWeight: 600,
+                        color: "var(--primary-btn-bg)",
+                      }}
+                    >
+                      ₹{p.price}
+                    </td>
+                    <td>
+                      <span
+                        className={`status ${
+                          p.status === "available"
+                            ? "published"
+                            : p.status === "reserved"
+                            ? "low-stock"
+                            : "out-of-stock"
+                        }`}
+                      >
+                        {p.status}
+                      </span>
+                    </td>
+                    <td className="actions">
+                      <IoPencil
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/admin/updateproperty", { state: { item: p } });
+                        }}
+                        style={{
+                          cursor: "pointer",
+                          fontSize: 20,
+                          color: "var(--primary-btn-bg)",
+                        }}
+                        title="Edit"
+                      />
+                      <MdDeleteForever
+                        onClick={(e) => openDeleteModal(p, e)}
+                        style={{
+                          cursor: "pointer",
+                          fontSize: 20,
+                          color: "var(--red-color)",
+                        }}
+                        title="Delete"
+                      />
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={8} style={{ textAlign: "center", padding: "40px", opacity: 0.6 }}>
+                  <td
+                    colSpan={8}
+                    style={{
+                      textAlign: "center",
+                      padding: "40px",
+                      opacity: 0.6,
+                    }}
+                  >
                     No properties found
                   </td>
                 </tr>
@@ -199,12 +249,17 @@ const GetProperties = () => {
         </div>
       )}
 
-      {/* delete modal (random code confirmation) */}
-      <DeleteConfirmModal
-        isOpen={deleteModalOpen}       // <-- boolean flag (fixed)
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={confirmDelete}
-      />
+      {/* 🟩 Simple Integrated Modal */}
+      {deleteModalOpen && (
+        <DeleteConfirmModal
+          isOpen={deleteModalOpen}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirm={() => {
+            confirmDelete();
+            setDeleteModalOpen(false);
+          }}
+        />
+      )}
 
       {/* Toastify */}
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar theme="colored" />

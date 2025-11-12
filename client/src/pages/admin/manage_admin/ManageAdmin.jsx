@@ -8,8 +8,11 @@ import { MdDeleteForever } from "react-icons/md";
 import api from "../../../api/axiosInstance";
 import { NavLink, useNavigate } from "react-router-dom";
 
-import "../../../assets/css/admin-card.css"
+import "../../../assets/css/admin-card.css";
 import { FaRegEye } from "react-icons/fa";
+import DeleteConfirmModal from "../../../components/modals/DeleteConfirmModal";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ManageAdmin = () => {
   const [activeTab, setActiveTab] = useState("All");
@@ -17,7 +20,13 @@ const ManageAdmin = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isTablet, setIsTablet] = useState(window.innerWidth >= 768 && window.innerWidth < 1024);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState(null); // for modal
+
+  // modal states
+  const [selectedAdmin, setSelectedAdmin] = useState(null); // for detail modal
+  const [selectedToDelete, setSelectedToDelete] = useState(null); // admin to delete
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +36,7 @@ const ManageAdmin = () => {
         setAdmins(res.data || []);
       } catch (error) {
         console.error(error);
+        toast.error("Failed to load admins");
       }
     };
     fetchClients();
@@ -39,15 +49,12 @@ const ManageAdmin = () => {
       setIsMobile(width < 768);
       setIsTablet(width >= 768 && width < 1024);
 
-      // keep sidebar state consistent: only allow sidebar-open on desktop
-      if (width >= 1024) {
-        // keep as is (desktop supports sidebar open)
-      } else {
+      if (width < 1024) {
         setIsSidebarOpen(false);
       }
     };
     window.addEventListener("resize", handleResize);
-    handleResize(); // run once to initialize properly
+    handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -55,39 +62,60 @@ const ManageAdmin = () => {
     activeTab === "All" ? true : activeTab === "Active" ? a.status === "active" : a.status === "block"
   );
 
-  const toggleSidebar = () => setIsSidebarOpen(v => !v);
+  const toggleSidebar = () => setIsSidebarOpen((v) => !v);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this admin?")) return;
+  // open delete modal (use this instead of window.confirm)
+  const openDeleteModal = (admin) => {
+    setSelectedToDelete(admin);
+    setDeleteModalOpen(true);
+  };
+
+  // called when DeleteConfirmModal verifies code and triggers onConfirm
+  const handleConfirmDelete = async () => {
+    if (!selectedToDelete) {
+      toast.error("No admin selected to delete");
+      setDeleteModalOpen(false);
+      return;
+    }
+
+    setIsDeleting(true);
     try {
-      await api.delete(`/admin/clients/${id}`);
-      setAdmins(prev => prev.filter(a => a.id !== id));
-      if (selectedAdmin?.id === id) setSelectedAdmin(null);
+      await api.delete(`/admin/delete-client/${selectedToDelete.id}`);
+      // remove from local state
+      setAdmins((prev) => prev.filter((a) => a.id !== selectedToDelete.id));
+      // close modals & clear selection
+      setDeleteModalOpen(false);
+      if (selectedAdmin?.id === selectedToDelete.id) setSelectedAdmin(null);
+      setSelectedToDelete(null);
+      toast.success("Admin deleted successfully ✅");
     } catch (error) {
       console.error("Delete error:", error);
-      alert("Failed to delete admin");
+      toast.error("Failed to delete admin ❌");
+      setDeleteModalOpen(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
-  const currentAdmin = { name: "Admin User", role: "admin" };
+
+  // show detail modal for desktop
+  const openDetailModal = (admin) => {
+    setSelectedAdmin(admin);
+  };
+
+  // close detail modal
+  const closeDetailModal = () => setSelectedAdmin(null);
 
   return (
     <>
-      {/* <Sidebar
-        admin={currentAdmin}
-        onLogout={() => { console.log("Logging out..."); }}
-        isMobile={isMobile}
-        isTablet={isTablet}
-        isSidebarOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-      />
-      <Navbar
-        admin={currentAdmin}
-        isMobile={isMobile}
-        isTablet={isTablet}
-        toggleSidebar={toggleSidebar}
-      /> */}
+      {/* Sidebar / Navbar optional - commented out if not used */}
+      {/* <Sidebar admin={{}} isMobile={isMobile} isTablet={isTablet} isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} /> */}
+      {/* <Navbar /> */}
 
-      <main className={`admin-panel-header-div ${isMobile ? "mobile-view" : ""} ${isTablet ? "tablet-view" : ""} ${isSidebarOpen ? "sidebar-open" : ""}`}>
+      <main
+        className={`admin-panel-header-div ${isMobile ? "mobile-view" : ""} ${isTablet ? "tablet-view" : ""} ${
+          isSidebarOpen ? "sidebar-open" : ""
+        }`}
+      >
         <Breadcrumb
           title="Clients"
           breadcrumbText="Clients List"
@@ -97,13 +125,19 @@ const ManageAdmin = () => {
         />
 
         <div className="admin-panel-header-tabs">
-          <button className={`admin-panel-header-tab ${activeTab === "All" ? "active" : ""}`} onClick={() => setActiveTab("All")}>All</button>
-          <button className={`admin-panel-header-tab ${activeTab === "Active" ? "active" : ""}`} onClick={() => setActiveTab("Active")}>Active</button>
-          <button className={`admin-panel-header-tab ${activeTab === "Blocked" ? "active" : ""}`} onClick={() => setActiveTab("Blocked")}>Blocked</button>
+          <button className={`admin-panel-header-tab ${activeTab === "All" ? "active" : ""}`} onClick={() => setActiveTab("All")}>
+            All
+          </button>
+          <button className={`admin-panel-header-tab ${activeTab === "Active" ? "active" : ""}`} onClick={() => setActiveTab("Active")}>
+            Active
+          </button>
+          <button className={`admin-panel-header-tab ${activeTab === "Blocked" ? "active" : ""}`} onClick={() => setActiveTab("Blocked")}>
+            Blocked
+          </button>
         </div>
 
-        {/* === Desktop / wide screens: show table ONLY on desktop (NOT tablet) === */}
-        {(!isMobile && !isTablet) && (
+        {/* Desktop Table */}
+        {!isMobile && !isTablet && (
           <div className={`dashboard-table-container`}>
             <table>
               <thead>
@@ -134,9 +168,9 @@ const ManageAdmin = () => {
                       </td>
                       <td className="admin-added">{a.createdat?.slice(0, 10)}</td>
                       <td className="actions admin-actions">
-                        <FaRegEye onClick={() => navigate(`/admin/view-admin/${a.id}`)} />
-                        <IoPencil onClick={() => navigate(`/admin/edit-admin/${a.id}`)} className="edit-btn" title="Edit Client" />
-                        <MdDeleteForever onClick={() => handleDelete(a.id)} className="delete-btn" title="Delete Client" />
+                        <FaRegEye onClick={() => navigate(`/admin/view-admin/${a.id}`)} style={{ cursor: "pointer", marginRight: 8 }} />
+                        <IoPencil onClick={() => navigate(`/admin/edit-admin/${a.id}`)} className="edit-btn" title="Edit Client" style={{ cursor: "pointer", marginRight: 8 }} />
+                        <MdDeleteForever onClick={() => openDeleteModal(a)} className="delete-btn" title="Delete Client" style={{ cursor: "pointer" }} />
                       </td>
                     </tr>
                   ))
@@ -152,43 +186,44 @@ const ManageAdmin = () => {
           </div>
         )}
 
-        {/* === Tablet & Mobile: show stacked cards === */}
+        {/* Mobile / Tablet Cards */}
         {(isMobile || isTablet) && (
           <div className="cardlist" style={{ marginTop: 16 }}>
-            {filtered.length > 0 ? filtered.map(a => (
-              <article
-                key={a.id}
-                className="card-row"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate(`/admin/client/${a.id}`)}
-                onKeyDown={(e) => { if (e.key === "Enter") navigate(`/admin/client/${a.id}`); }}
-              >
-                <div className="card-left">
-                  <img src={`/uploads/${a.img}`} alt={a.name} />
-                </div>
-
-                <div className="card-middle">
-                  <div className="card-title">{a.name}</div>
-                  <div className="card-sub">{a.email}</div>
-                </div>
-
-                <div className="card-right">
-                  <div className={`count-pill ${a.status === "active" ? "published" : "out-of-stock"}`}>
-                    {a.status}
+            {filtered.length > 0 ? (
+              filtered.map((a) => (
+                <article
+                  key={a.id}
+                  className="card-row"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/admin/client/${a.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") navigate(`/admin/client/${a.id}`);
+                  }}
+                >
+                  <div className="card-left">
+                    <img src={`/uploads/${a.img}`} alt={a.name} />
                   </div>
-                </div>
-              </article>
-            )) : (
+
+                  <div className="card-middle">
+                    <div className="card-title">{a.name}</div>
+                    <div className="card-sub">{a.email}</div>
+                  </div>
+
+                  <div className="card-right">
+                    <div className={`count-pill ${a.status === "active" ? "published" : "out-of-stock"}`}>{a.status}</div>
+                  </div>
+                </article>
+              ))
+            ) : (
               <div className="empty-state">No admins found</div>
             )}
           </div>
         )}
 
-
-        {/* === Modal for selected admin (desktop only) === */}
+        {/* Detail modal (desktop) */}
         {selectedAdmin && (
-          <div className="detail-modal-overlay" onClick={() => setSelectedAdmin(null)}>
+          <div className="detail-modal-overlay" onClick={closeDetailModal}>
             <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
               <div className="detail-modal-header">
                 <div className="header-left">
@@ -201,8 +236,8 @@ const ManageAdmin = () => {
 
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="icon-btn" onClick={() => navigate(`/admin/edit-admin/${selectedAdmin.id}`)}>Edit</button>
-                  <button className="icon-btn delete" onClick={() => handleDelete(selectedAdmin.id)}>Delete</button>
-                  <button className="close-btn" onClick={() => setSelectedAdmin(null)}>Close</button>
+                  <button className="icon-btn delete" onClick={() => openDeleteModal(selectedAdmin)}>Delete</button>
+                  <button className="close-btn" onClick={closeDetailModal}>Close</button>
                 </div>
               </div>
 
@@ -215,14 +250,26 @@ const ManageAdmin = () => {
 
               <div className="detail-modal-footer">
                 <button className="primary-btn" onClick={() => navigate(`/admin/edit-admin/${selectedAdmin.id}`)}>Edit</button>
-                <button className="cancel-btn" onClick={() => { handleDelete(selectedAdmin.id); }}>Delete</button>
+                <button className="cancel-btn" onClick={() => openDeleteModal(selectedAdmin)}>Delete</button>
                 <button className="info-btn" onClick={() => setSelectedAdmin(null)}>Close</button>
               </div>
             </div>
           </div>
         )}
-
       </main>
+
+      {/* Delete Confirm Modal (random-code modal) */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setSelectedToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        selected={selectedToDelete}
+      />
+
+      <ToastContainer position="top-right" autoClose={2500} hideProgressBar theme="colored" />
     </>
   );
 };

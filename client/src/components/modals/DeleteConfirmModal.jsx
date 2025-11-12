@@ -15,7 +15,6 @@ const DeleteConfirmModal = ({ isOpen, onClose, onConfirm }) => {
 
   const handleDelete = () => {
     if (inputCode.trim() === randomCode) {
-      toast.success("Code matched");
       onConfirm();
     } else {
       toast.error("Wrong code");

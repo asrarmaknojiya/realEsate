@@ -1,4 +1,3 @@
-// client/src/pages/admin/manage/ClientDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
@@ -8,6 +7,9 @@ import { FaEnvelope, FaPhone } from "react-icons/fa";
 import { IoTrashOutline, IoPencilOutline } from "react-icons/io5";
 import { MdPayments } from "react-icons/md";
 import "../../../assets/css/admin/client-details.css";
+import DeleteConfirmModal from "../../../components/modals/DeleteConfirmModal"; 
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ClientDetails = () => {
   const { id } = useParams();
@@ -18,6 +20,11 @@ const ClientDetails = () => {
   const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024 && window.innerWidth > 768);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // modal + loading states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // responsive resize handler
   useEffect(() => {
     const onResize = () => {
       const w = window.innerWidth;
@@ -29,12 +36,14 @@ const ClientDetails = () => {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // fetch client data
   const fetchClient = async () => {
     try {
       const res = await api.get(`/admin/getUserById/${id}`);
       setClient(res.data || {});
     } catch (err) {
       console.error("fetchClient", err);
+      toast.error("Failed to fetch client details ❌");
     }
   };
 
@@ -43,27 +52,41 @@ const ClientDetails = () => {
     // eslint-disable-next-line
   }, [id]);
 
-  const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this client? This action cannot be undone.")) return;
+  // open delete modal
+  const openDeleteModal = () => setDeleteModalOpen(true);
+
+  // confirm delete (called when correct code entered)
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
     try {
-      await api.delete(`/admin/clients/${id}`);
-      alert("Client deleted.");
-      navigate("/admin/manage-admins");
+      await api.delete(`/admin/delete-client/${id}`);
+      toast.success("Client deleted successfully ✅");
+      setDeleteModalOpen(false);
+      setTimeout(() => navigate("/admin/manage-admins"), 1500);
     } catch (err) {
       console.error("delete client", err);
-      alert("Failed to delete client.");
+      toast.error("Failed to delete client ❌");
+      setDeleteModalOpen(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <>
+      {/* Navbar / Sidebar optional */}
+      {/* <Navbar /> */}
+      {/* <Sidebar open={isSidebarOpen} onToggle={() => setIsSidebarOpen(!isSidebarOpen)} /> */}
 
-      <main className={`admin-panel-header-div ${isMobile ? "mobile-view" : ""} ${isTablet ? "tablet-view" : ""} ${isSidebarOpen ? "sidebar-open" : ""}`}>
-        {/* Top row: Back (left) + Payment (right) */}
+      <main
+        className={`admin-panel-header-div ${isMobile ? "mobile-view" : ""} ${
+          isTablet ? "tablet-view" : ""
+        } ${isSidebarOpen ? "sidebar-open" : ""}`}
+      >
+        {/* Top row: Back (left) + View Payments (right) */}
         <div className="form-header-top">
           <div className="header-top-left">
             <button className="header-back-btn" onClick={() => navigate(-1)}>
-              {/* keep icon consistent with AddProperty */}
               <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <IoPencilOutline style={{ display: "none" }} />
               </span>
@@ -76,12 +99,12 @@ const ClientDetails = () => {
               className="info-btn form-save-btn"
               onClick={() => navigate(`/admin/view-admin/${id}`)}
             >
-              <MdPayments />View Payments
+              <MdPayments /> View Payments
             </button>
           </div>
         </div>
 
-        {/* Title row: Title centered (below top) + Edit/Delete on the right */}
+        {/* Title row */}
         <div className="form-header-title header-with-actions">
           <div>
             <h5>Client Details</h5>
@@ -94,12 +117,20 @@ const ClientDetails = () => {
             >
               <IoPencilOutline /> Edit
             </button>
-            <button className="cancel-btn" onClick={handleDelete}>
+
+            {/* delete now uses modal */}
+            <button
+              className="cancel-btn"
+              onClick={openDeleteModal}
+              disabled={isDeleting}
+              style={{ opacity: isDeleting ? 0.6 : 1 }}
+            >
               <IoTrashOutline /> Delete
             </button>
           </div>
         </div>
 
+        {/* Main content */}
         <div className="form-content-grid">
           <div className="form-left">
             <div className="form-card">
@@ -112,8 +143,12 @@ const ClientDetails = () => {
                 />
                 <div className="profile-details">
                   <h3>{client.name || "—"}</h3>
-                  <p><FaEnvelope /> {client.email || "—"}</p>
-                  <p><FaPhone /> {client.number || "—"}</p>
+                  <p>
+                    <FaEnvelope /> {client.email || "—"}
+                  </p>
+                  <p>
+                    <FaPhone /> {client.number || "—"}
+                  </p>
                   <div className="profile-bio">{client.about || "No bio available."}</div>
                 </div>
               </div>
@@ -122,14 +157,34 @@ const ClientDetails = () => {
             <div className="form-card">
               <h6>Other Details</h6>
               <div className="details-grid">
-                <div><strong>Status:</strong> <span>{client.status || "—"}</span></div>
-                <div><strong>Added:</strong> <span>{(client.createdat || client.created_at || "").slice(0, 10) || "—"}</span></div>
-                <div><strong>Alternate Phone:</strong> <span>{client.alt_number || "—"}</span></div>
+                <div>
+                  <strong>Status:</strong> <span>{client.status || "—"}</span>
+                </div>
+                <div>
+                  <strong>Added:</strong>{" "}
+                  <span>
+                    {(client.createdat || client.created_at || "").slice(0, 10) || "—"}
+                  </span>
+                </div>
+                <div>
+                  <strong>Alternate Phone:</strong>{" "}
+                  <span>{client.alt_number || "—"}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      {/* 🧾 Delete Modal (uses your existing random-code confirm) */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
+
+      {/* Toastify container */}
+      <ToastContainer position="top-right" autoClose={2500} hideProgressBar theme="colored" />
     </>
   );
 };
